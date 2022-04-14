@@ -5,7 +5,7 @@ class Motor:
     def __init__(self):
         self.motor1 = DRV8825(dir_pin=13, step_pin=19,
                               enable_pin=12, mode_pins=(16, 17, 20))
-        self.motor1.SetMicroStep('softward', '1/32step')
+        self.motor1.SetMicroStep('softward', 'fullstep')
 
     def move_monochrom_backward(self, number_of_steps, disable=True):
         steps = int(number_of_steps)
