@@ -73,6 +73,7 @@ class DRV8825():
         print("turn step:", steps)
         for i in range(steps):
             self.digital_write(self.step_pin, True)
+            print(i)
             time.sleep(stepdelay)
             self.digital_write(self.step_pin, False)
             time.sleep(stepdelay)
