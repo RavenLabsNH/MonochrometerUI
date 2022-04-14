@@ -1,5 +1,3 @@
-import RPi.GPIO as GPIO
-import time
 from DRV8825 import DRV8825
 
 
