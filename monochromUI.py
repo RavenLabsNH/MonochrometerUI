@@ -18,7 +18,7 @@ class MonochromUI():
         with dpg.window(tag="Monochrom", width=800, height=400) as window:
             dpg.add_button(label="<", width=202, height=40, tag="left_button", callback=self.move_monochrom)
             dpg.add_button(label=">", width=202, height=40, tag="right_button")
-            dpg.add_button(label="Stop", width=202, height=40, tag="right_button", callback=self.stop_mnonochrom)
+            dpg.add_button(label="Stop", width=202, height=40, tag="stop_button", callback=self.stop_mnonochrom)
 
         dpg.create_viewport(title='Monochrom', width=800, height=400, x_pos=40, y_pos=40)
         dpg.setup_dearpygui()
