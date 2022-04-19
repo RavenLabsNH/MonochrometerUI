@@ -92,6 +92,6 @@ class DRV8825():
 
         while self.running_flag.value == True:
             self.digital_write(self.step_pin, True)
-            time.sleep(stepdelay)
+            #time.sleep(stepdelay)
             self.digital_write(self.step_pin, False)
-            time.sleep(stepdelay)
+            #time.sleep(stepdelay)
