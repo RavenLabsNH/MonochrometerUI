@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../../RavenLabs/DekaDynoGUI/.idea/DynoGUI.iml" filepath="$PROJECT_DIR$/../../RavenLabs/DekaDynoGUI/.idea/DynoGUI.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/MonochrometerUI.iml" filepath="$PROJECT_DIR$/.idea/MonochrometerUI.iml" />
     </modules>
   </component>

@@ -1,6 +1,9 @@
-from Motor import Motor
+import dearpygui.dearpygui as dpg
+#from Motor import Motor
+from monochromUI import MonochromUI
 
 
 if __name__ == "__main__":
-    motor = Motor()
-    motor.move_monochrom_backward(12800)
+    monochrom = MonochromUI()
+    monochrom.create_page()
+    monochrom.run()
