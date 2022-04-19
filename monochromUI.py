@@ -45,10 +45,14 @@ class MonochromUI():
             self.running_flag.value = True
             forward_process = mp.Process(target=self.motor.move_monochrom_backward_continuous)
             forward_process.start()
-        elif dpg.is_item_active("right_button") and self.running_flag.value is False:
-            self.running_flag.value = True
-            backward_process = mp.Process(target=self.motor.move_monochrom_forward_continuous)
-            backward_process.start()
+        # elif dpg.is_item_active("right_button") and self.running_flag.value is False:
+        #     self.running_flag.value = True
+        #     backward_process = mp.Process(target=self.motor.move_monochrom_forward_continuous)
+        #     backward_process.start()
+
+    def move_process(self):
+        motor = Motor(self.running_flag)
+        motor.move_monochrom_backward_continuous()
 
     def stop_mnonochrom(self):
         self.running_flag.value = False
