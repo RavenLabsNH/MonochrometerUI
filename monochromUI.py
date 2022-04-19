@@ -15,8 +15,8 @@ class MonochromUI():
             dpg.add_mouse_release_handler(callback=self.stop_mnonochrom)
 
         with dpg.window(tag="Monochrom", width=800, height=400) as window:
-            dpg.add_button(label="<", width=202, height=40, tag="left_button", callback=self.move_monochrom)
-            dpg.add_button(label=">", width=202, height=40, tag="right_button", callback=self.move_monochrom)
+            dpg.add_button(label="<", width=202, height=40, tag="left_button", callback=self.move_monochrom_left)
+            dpg.add_button(label=">", width=202, height=40, tag="right_button", callback=self.move_monochrom_right)
 
         dpg.create_viewport(title='Monochrom', width=800, height=400, x_pos=40, y_pos=40)
         dpg.setup_dearpygui()
@@ -35,12 +35,14 @@ class MonochromUI():
         while dpg.is_dearpygui_running():
             dpg.render_dearpygui_frame()
 
-    def move_monochrom(self):
-        if dpg.is_item_clicked("left_button") and self.running_flag.value is False:
+    def move_monochrom_left(self):
+        if self.running_flag.value is False:
             self.running_flag.value = True
             forward_process = mp.Process(target=self.motor.move_monochrom_backward_continuous)
             forward_process.start()
-        elif dpg.is_item_clicked("right_button") and self.running_flag.value is False:
+
+    def move_monochrom_right(self):
+        if self.running_flag.value is False:
             self.running_flag.value = True
             backward_process = mp.Process(target=self.motor.move_monochrom_forward_continuous)
             backward_process.start()
