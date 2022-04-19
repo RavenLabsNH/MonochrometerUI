@@ -22,7 +22,7 @@ class MonochromUI():
         dpg.create_viewport(title='Monochrom', width=800, height=400, x_pos=40, y_pos=40)
         dpg.setup_dearpygui()
         dpg.set_viewport_vsync(True)
-        dpg.configure_app(wait_for_input=True)
+        #dpg.configure_app(wait_for_input=True)
 
         #dpg.show_metrics()
         dpg.show_viewport()
@@ -34,9 +34,9 @@ class MonochromUI():
         Run the main DearPyGui render thread
         """
         while dpg.is_dearpygui_running():
-            # self.index = self.index+1
-            # if self.index%4 == 0:
-            dpg.render_dearpygui_frame()
+            self.index = self.index+1
+            if self.index%4 == 0:
+                dpg.render_dearpygui_frame()
 
     def move_monochrom(self):
         if dpg.is_item_active("left_button") and self.running_flag.value is False:
