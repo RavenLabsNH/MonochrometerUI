@@ -6,6 +6,7 @@ from ctypes import c_bool
 class MonochromUI():
     def __init__(self):
         dpg.create_context()
+        mp.set_start_method('spawn')
         self.running_flag = mp.Value(c_bool, False)
         self.motor = Motor(self.running_flag)
         self.index = 0
