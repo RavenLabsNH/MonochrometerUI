@@ -36,11 +36,11 @@ class MonochromUI():
             dpg.render_dearpygui_frame()
 
     def move_monochrom(self):
-        if dpg.is_item_active("left_button") and self.running_flag.value is False:
+        if dpg.is_item_clicked("left_button") and self.running_flag.value is False:
             self.running_flag.value = True
             forward_process = mp.Process(target=self.motor.move_monochrom_backward_continuous)
             forward_process.start()
-        elif dpg.is_item_active("right_button") and self.running_flag.value is False:
+        elif dpg.is_item_clicked("right_button") and self.running_flag.value is False:
             self.running_flag.value = True
             backward_process = mp.Process(target=self.motor.move_monochrom_forward_continuous)
             backward_process.start()
