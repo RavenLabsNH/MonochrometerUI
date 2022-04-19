@@ -77,7 +77,7 @@ class DRV8825():
             self.digital_write(self.step_pin, False)
             time.sleep(stepdelay)
 
-    def TurnContinous(self, dir, stepdelay=0.005):
+    def TurnContinous(self, dir, stepdelay=0.000005):
         if (dir == MotorDir[0]):
             print("forward")
             self.digital_write(self.enable_pin, 1)
