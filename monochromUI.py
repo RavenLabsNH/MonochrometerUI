@@ -20,6 +20,7 @@ class MonochromUI():
 
         dpg.create_viewport(title='Monochrom', width=800, height=400, x_pos=40, y_pos=40)
         dpg.setup_dearpygui()
+        dpg.show_metrics()
         dpg.show_viewport()
 
         dpg.set_primary_window("Monochrom", True)
