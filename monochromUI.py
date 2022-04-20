@@ -31,17 +31,18 @@ class MonochromUI():
 
     def create_page(self):
 
-        with dpg.handler_registry():
-            dpg.add_mouse_down_handler(callback=self.move_monochrom)
-            dpg.add_mouse_release_handler(callback=self.stop_mnonochrom)
+        # with dpg.handler_registry():
+        #     dpg.add_mouse_down_handler(callback=self.move_monochrom)
+        #     dpg.add_mouse_release_handler(callback=self.stop_mnonochrom)
 
         with dpg.font_registry():
             # first argument ids the path to the .ttf or .otf file
             font_bold_48 = dpg.add_font("fonts/SourceSansPro-Bold.ttf", 70)
             font_bold_40 = dpg.add_font("fonts/SourceSansPro-Bold.ttf", 40)
             font_regular_30 = dpg.add_font("fonts/SourceSansPro-Regular.ttf", 38)
-            font_regular_32 = dpg.add_font("fonts/SourceSansPro-Regular.ttf", 48)
+            font_regular_32 = dpg.add_font("fonts/SourceSansPro-Regular.ttf", 42)
             font_regular_48 = dpg.add_font("fonts/SourceSansPro-Regular.ttf", 70)
+            font_regular_100 = dpg.add_font("fonts/SourceSansPro-Regular.ttf", 140)
 
 
         with dpg.theme() as main_theme:
@@ -75,7 +76,7 @@ class MonochromUI():
                 dpg.add_text("Monochromator Control Software", pos=[361, 24])
                 dpg.bind_item_font(dpg.last_item(), font_regular_48)
             #dpg.add_separator(pos=[0,106])
-            with dpg.child_window(autosize_x=True, height=1094, show=True, tag="selection_page", border=True):
+            with dpg.child_window(autosize_x=True, height=1094, show=False, tag="selection_page", border=True):
                 dpg.add_text("Select a Device", pos=[40, 40])
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
 
@@ -113,20 +114,113 @@ class MonochromUI():
                 dpg.add_text("Create a New Model", pos=[40, 40])
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
 
-                dpg.add_text("Current Position", pos=[40, 427])
+                dpg.add_text("Model", pos=[40, 125])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                dpg.add_input_text(hint="Enter Current Position", width=850, pos=[40, 475])
+                dpg.add_input_text(hint="Enter Model", width=850, pos=[40, 173])
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
-                dpg.add_button(label="Done", callback=self.create_profile)
 
-            with dpg.child_window(autosize_x=True, height=1094, show=False, tag="calibration_page", border=False):
-                dpg.add_button(label="Done", callback=change_view, user_data="motor_page")
+                dpg.add_combo(["25 nm/rev", "50 nm/rev", "100 nm/rev", "200 nm/rev", "Custon"],
+                              pos=[40, 381], width=850)
+                dpg.bind_item_font(dpg.last_item(), font_regular_48)
+                dpg.bind_item_theme(dpg.last_item(), input_theme)
 
-            with dpg.child_window(autosize_x=True, height=1094, show=False, tag="motor_page", border=False):
-                dpg.add_button(label="<", width=202, height=40, tag="left_button", callback=self.move_monochrom)
-                dpg.add_button(label=">", width=202, height=40, tag="right_button")
+                dpg.add_button(label="Save Model", width=850, height=120, pos=[40, 578],
+                               callback=self.create_profile)
+                dpg.bind_item_font(dpg.last_item(), font_bold_40)
+
+
+            with dpg.child_window(autosize_x=True, height=1094, show=True, tag="motor_page",
+                                  no_scrollbar=True, border=False):
+
+                #Left Side
+                dpg.add_text("Manual Move", pos=[40, 40])
+                dpg.bind_item_font(dpg.last_item(), font_bold_48)
+
+                dpg.add_text("Hold down the arrow to move the machine, or specify a new \nposition in the box to move to.",
+                             pos=[40, 109])
+                dpg.bind_item_font(dpg.last_item(), font_regular_32)
+
+                dpg.add_button(width=420, height=228, pos=[40, 229])
+                dpg.add_button(width=420, height=228, pos=[500, 229])
+
+                dpg.add_text("Current Position", pos=[40, 501])
+                dpg.bind_item_font(dpg.last_item(), font_regular_32)
+
+                dpg.add_text("1245.0", pos=[40, 559])
+                dpg.bind_item_font(dpg.last_item(), font_regular_100)
+
+                dpg.add_text("Move to Position", pos=[486, 501])
+                dpg.bind_item_font(dpg.last_item(), font_regular_32)
+
+                dpg.add_input_text( width=434, pos=[486, 549])
+                dpg.bind_item_font(dpg.last_item(), font_bold_48)
+                dpg.bind_item_theme(dpg.last_item(), input_theme)
+
+                dpg.add_button(label="Go To Position", width=879, height=120, pos=[40, 734])
+                dpg.bind_item_font(dpg.last_item(), font_bold_40)
+
+
+                #Right Side
+                dpg.add_text("Run a Recipe", pos=[1000, 40])
+                dpg.bind_item_font(dpg.last_item(), font_bold_48)
+
+                dpg.add_text(
+                    "Enter a custom recipe to run the Optometrics software on \ncontinuously or on a cycle",
+                    pos=[1000, 109])
+                dpg.bind_item_font(dpg.last_item(), font_regular_32)
+
+                dpg.add_text("From", pos=[1004, 279])
+                dpg.bind_item_font(dpg.last_item(), font_regular_32)
+                dpg.add_input_text(width=201, pos=[1090, 229])
+                dpg.bind_item_font(dpg.last_item(), font_bold_48)
+                dpg.bind_item_theme(dpg.last_item(), input_theme)
+                dpg.add_text("nm", pos=[1307, 279])
+                dpg.bind_item_font(dpg.last_item(), font_regular_32)
+
+                dpg.add_text("To", pos=[1569, 279])
+                dpg.bind_item_font(dpg.last_item(), font_regular_32)
+                dpg.add_input_text(width=201, pos=[1618, 229])
+                dpg.bind_item_font(dpg.last_item(), font_bold_48)
+                dpg.bind_item_theme(dpg.last_item(), input_theme)
+                dpg.add_text("nm", pos=[1835, 279])
+                dpg.bind_item_font(dpg.last_item(), font_regular_32)
+
+                dpg.add_text("Delay", pos=[999, 439])
+                dpg.bind_item_font(dpg.last_item(), font_regular_32)
+                dpg.add_input_text(width=201, pos=[1090, 389])
+                dpg.bind_item_font(dpg.last_item(), font_bold_48)
+                dpg.bind_item_theme(dpg.last_item(), input_theme)
+                dpg.add_text("sec", pos=[1307, 439])
+                dpg.bind_item_font(dpg.last_item(), font_regular_32)
+
+                dpg.add_text("Increment", pos=[1464, 439])
+                dpg.bind_item_font(dpg.last_item(), font_regular_32)
+                dpg.add_input_text(width=201, pos=[1618, 389])
+                dpg.bind_item_font(dpg.last_item(), font_bold_48)
+                dpg.bind_item_theme(dpg.last_item(), input_theme)
+                dpg.add_text("nm", pos=[1835, 439])
+                dpg.bind_item_font(dpg.last_item(), font_regular_32)
+
+                dpg.add_radio_button(["Cycles", "Continuous"], pos=[1091, 549])
+                dpg.bind_item_font(dpg.last_item(), font_regular_32)
+
+                dpg.add_text("Cycles", pos=[1517, 599])
+                dpg.bind_item_font(dpg.last_item(), font_regular_32)
+                dpg.add_input_text(width=201, pos=[1618, 549])
+                dpg.bind_item_font(dpg.last_item(), font_bold_48)
+                dpg.bind_item_theme(dpg.last_item(), input_theme)
+
+                dpg.add_button(label="Run Recipe", width=879, height=120, pos=[1000, 734])
+                dpg.bind_item_font(dpg.last_item(), font_bold_40)
+
+                with dpg.drawlist(width=1920, height=1094):
+                    dpg.draw_line((960, 0), (960, 1094), color=(201, 217, 235), thickness=3)
+
+
+                # dpg.add_button(label="<", width=202, height=40, tag="left_button", callback=self.move_monochrom)
+                # dpg.add_button(label=">", width=202, height=40, tag="right_button")
 
         dpg.bind_item_theme(window, main_theme)
         dpg.bind_item_theme(header, header_theme)
