@@ -340,7 +340,7 @@ class MonochromUI():
 
         dpg.show_metrics()
         dpg.show_viewport()
-        dpg.toggle_viewport_fullscreen()
+        #dpg.toggle_viewport_fullscreen()
         dpg.set_primary_window("Monochrom", True)
 
     def run(self):
