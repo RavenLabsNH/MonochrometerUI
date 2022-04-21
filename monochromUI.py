@@ -338,7 +338,7 @@ class MonochromUI():
         dpg.set_viewport_vsync(True)
         dpg.configure_app(wait_for_input=False)
 
-        dpg.show_metrics()
+        #dpg.show_metrics()
         dpg.show_viewport()
         #dpg.toggle_viewport_fullscreen()
         dpg.set_primary_window("Monochrom", True)
