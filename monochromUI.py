@@ -1,7 +1,7 @@
 import dearpygui.dearpygui as dpg
 import multiprocessing as mp
 import yaml
-from motor import Motor
+#from motor import Motor
 from ctypes import c_bool
 
 
@@ -336,7 +336,7 @@ class MonochromUI():
 
         dpg.setup_dearpygui()
         dpg.set_viewport_vsync(True)
-        dpg.configure_app(wait_for_input=False)
+        dpg.configure_app(wait_for_input=True)
 
         dpg.show_metrics()
         dpg.show_viewport()
