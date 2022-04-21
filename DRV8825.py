@@ -98,9 +98,11 @@ class DRV8825():
         while self.running_flag.value == True:
             if (dir == MotorDir[0]) and GPIO.input(HIGH_PIN) == 0:
                 self.running_flag.value = False
+                print("Low triggerd")
                 break
             if (dir == MotorDir[1]) and GPIO.input(LOW_PIN) == 0:
                 self.running_flag.value = False
+                print("High triggerd")
                 break
             self.digital_write(self.step_pin, True)
             time.sleep(stepdelay)
