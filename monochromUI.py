@@ -73,12 +73,12 @@ class MonochromUI():
 
         with dpg.font_registry():
             # first argument ids the path to the .ttf or .otf file
-            font_bold_48 = dpg.add_font("fonts/SourceSansPro-Bold.ttf", 70)
-            font_bold_40 = dpg.add_font("fonts/SourceSansPro-Bold.ttf", 40)
-            font_regular_30 = dpg.add_font("fonts/SourceSansPro-Regular.ttf", 38)
-            font_regular_32 = dpg.add_font("fonts/SourceSansPro-Regular.ttf", 42)
-            font_regular_48 = dpg.add_font("fonts/SourceSansPro-Regular.ttf", 60)
-            font_regular_100 = dpg.add_font("fonts/SourceSansPro-Regular.ttf", 140)
+            font_bold_48 = dpg.add_font("fonts/SourceSansPro-Bold.ttf", 35)
+            font_bold_40 = dpg.add_font("fonts/SourceSansPro-Bold.ttf", 20)
+            font_regular_30 = dpg.add_font("fonts/SourceSansPro-Regular.ttf", 19)
+            font_regular_32 = dpg.add_font("fonts/SourceSansPro-Regular.ttf", 21)
+            font_regular_48 = dpg.add_font("fonts/SourceSansPro-Regular.ttf", 30)
+            font_regular_100 = dpg.add_font("fonts/SourceSansPro-Regular.ttf", 70)
 
         with dpg.texture_registry():
             width, height, channels, data2 = dpg.load_image("content/logo.png")
@@ -109,7 +109,7 @@ class MonochromUI():
 
         with dpg.theme() as input_theme:
             with dpg.theme_component(dpg.mvAll):
-                dpg.add_theme_style(dpg.mvStyleVar_FramePadding, 7, 30, category=dpg.mvThemeCat_Core)
+                dpg.add_theme_style(dpg.mvStyleVar_FramePadding, 7, 15, category=dpg.mvThemeCat_Core)
                 dpg.add_theme_style(dpg.mvStyleVar_ItemSpacing, 0, 10, category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_Button, (255, 255, 255), category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_FrameBgActive, (244, 248, 252), category=dpg.mvThemeCat_Core)
@@ -117,7 +117,7 @@ class MonochromUI():
         with dpg.theme() as input_button_theme:
             with dpg.theme_component(dpg.mvAll, enabled_state=True):
                 dpg.add_theme_color(dpg.mvThemeCol_Button, (255, 255, 255), category=dpg.mvThemeCat_Core)
-                dpg.add_theme_style(dpg.mvStyleVar_FrameBorderSize, 3, category=dpg.mvThemeCat_Core)
+                dpg.add_theme_style(dpg.mvStyleVar_FrameBorderSize, 1, category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_Border, (0, 88, 182), category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_Text, (0, 88, 182), category=dpg.mvThemeCat_Core)
             with dpg.theme_component(dpg.mvAll, enabled_state=False):
@@ -133,94 +133,94 @@ class MonochromUI():
 
         with dpg.theme() as radio_button_theme:
             with dpg.theme_component(dpg.mvAll):
-                dpg.add_theme_style(dpg.mvStyleVar_ItemSpacing, 0, 40, category=dpg.mvThemeCat_Core)
-                dpg.add_theme_style(dpg.mvStyleVar_FrameBorderSize, 2, category=dpg.mvThemeCat_Core)
+                dpg.add_theme_style(dpg.mvStyleVar_ItemSpacing, 0, 20, category=dpg.mvThemeCat_Core)
+                dpg.add_theme_style(dpg.mvStyleVar_FrameBorderSize, 1, category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_Border, (0, 88, 182), category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_Button, (0, 88, 182), category=dpg.mvThemeCat_Core)
 
-        with dpg.window(tag="Monochrom", width=1920, height=1200) as window:
-            with dpg.child_window(autosize_x=True, height=107, border=False) as header:
-                dpg.add_image("logo", pos=[16, 16], width=281, height=76)
-                dpg.add_text("Monochromator Control Software", pos=[361, 20])
+        with dpg.window(tag="Monochrom", width=960, height=600) as window:
+            with dpg.child_window(autosize_x=True, height=53, border=False) as header:
+                dpg.add_image("logo", pos=[8, 8], width=140, height=38)
+                dpg.add_text("Monochromator Control Software", pos=[180, 10])
                 dpg.bind_item_font(dpg.last_item(), font_regular_48)
-                with dpg.drawlist(width=1920, height=107):
-                    dpg.draw_line((329, 16), (329, 77), color=(201, 217, 235), thickness=3)
-                    dpg.draw_line((0, 106), (1920, 105), color=(201, 217, 235), thickness=3)
+                with dpg.drawlist(width=960, height=53):
+                    dpg.draw_line((164, 9), (164, 39), color=(201, 217, 235), thickness=3)
+                    dpg.draw_line((0, 53), (1920, 53), color=(201, 217, 235), thickness=3)
 
             with dpg.child_window(autosize_x=True, autosize_y=True, show=True, tag="device_page", border=False):
-                dpg.add_text("Select a Device", pos=[40, 40])
+                dpg.add_text("Select a Device", pos=[20, 20])
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
 
-                dpg.add_text("Model Number", pos=[40, 147])
+                dpg.add_text("Model Number", pos=[20, 73])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                dpg.add_combo(self.profile_names, default_value="Model A", pos=[40, 195], width=850)
+                dpg.add_combo(self.profile_names, default_value="Model A", pos=[20, 97], width=425)
                 dpg.bind_item_font(dpg.last_item(), font_regular_48)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
 
-                dpg.add_button(label="Test", pos=[900, 195], height=120, width=40)
+                dpg.add_button(label="Test", pos=[450, 97], height=60, width=20)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
 
-                dpg.add_button(label="+ Create a new Model", width=363, height=48, pos=[527, 339],
+                dpg.add_button(label="+ Create a new Model", width=181, height=24, pos=[263, 169],
                                callback=change_view, user_data="create_page")
                 dpg.bind_item_font(dpg.last_item(), font_bold_40)
                 dpg.bind_item_theme(dpg.last_item(), transparent_button_theme)
 
-                dpg.add_text("Current Position", pos=[40, 427])
+                dpg.add_text("Current Position", pos=[20, 213])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                dpg.add_input_text(hint="Enter Current Position", width=850, pos=[40, 475], decimal=True,
+                dpg.add_input_text(hint="Enter Current Position", width=425, pos=[20, 237], decimal=True,
                                    no_spaces=True, callback=change_state, user_data="calibrate_button")
                 dpg.bind_item_font(dpg.last_item(), font_regular_48)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
 
                 dpg.add_text("The current position can be found by reading the dial on the front of\n the machine",
-                             pos=[40, 619])
+                             pos=[20, 309])
                 dpg.bind_item_font(dpg.last_item(), font_regular_30)
 
-                dpg.add_button(label="Calibrate", width=850, height=120, pos=[40, 739], enabled=False,
+                dpg.add_button(label="Calibrate", width=425, height=60, pos=[20, 369], enabled=False,
                                tag="calibrate_button", callback=change_view, user_data="motor_page")
                 dpg.bind_item_font(dpg.last_item(), font_bold_40)
                 dpg.bind_item_theme(dpg.last_item(), input_button_theme)
 
             with dpg.child_window(autosize_x=True, autosize_y=True, show=False, tag="create_page", border=False):
-                dpg.add_text("Create a New Model", pos=[40, 40])
+                dpg.add_text("Create a New Model", pos=[20, 20])
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
 
-                dpg.add_text("Model", pos=[40, 125])
+                dpg.add_text("Model", pos=[20, 62])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                dpg.add_input_text(hint="Enter Model", width=850, pos=[40, 173],
+                dpg.add_input_text(hint="Enter Model", width=425, pos=[20, 86],
                                    callback=change_state_create, tag="model_input")
                 dpg.bind_item_font(dpg.last_item(), font_regular_48)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
 
-                dpg.add_text("Calibration", pos=[40, 333])
+                dpg.add_text("Calibration", pos=[20, 166])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
                 dpg.add_combo(["25 nm/rev", "50 nm/rev", "100 nm/rev", "200 nm/rev", "Custom"],
-                              default_value="25 nm/rev", pos=[40, 381], width=850, callback=calibration_callback)
+                              default_value="25 nm/rev", pos=[20, 190], width=425, callback=calibration_callback)
                 dpg.bind_item_font(dpg.last_item(), font_regular_48)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
 
-                dpg.add_text("Custom Resolution", pos=[40, 541], show=False, tag="resolution_text")
+                dpg.add_text("Custom Resolution", pos=[20, 270], show=False, tag="resolution_text")
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                dpg.add_input_text(hint="Enter Custom Resolution", width=850, pos=[40, 589], decimal=True,
+                dpg.add_input_text(hint="Enter Custom Resolution", width=425, pos=[20, 294], decimal=True,
                                    show=False, no_spaces=True, callback=change_state_create,
                                    user_data="calibrate_button", tag="resolution_input")
                 dpg.bind_item_font(dpg.last_item(), font_regular_48)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
 
-                dpg.add_text("nm/rev", pos=[906, 639], tag="resolution_units", show=False)
+                dpg.add_text("nm/rev", pos=[453, 319], tag="resolution_units", show=False)
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                dpg.add_button(label="Save Model", width=850, height=120, pos=[40, 578], tag="save_model_button",
+                dpg.add_button(label="Save Model", width=425, height=60, pos=[20, 289], tag="save_model_button",
                                callback=self.create_profile, enabled=False)
                 dpg.bind_item_font(dpg.last_item(), font_bold_40)
                 dpg.bind_item_theme(dpg.last_item(), input_button_theme)
 
-                dpg.add_button(label="Back to Device Page", width=354, height=40, pos=[56, 977],
+                dpg.add_button(label="Back to Device Page", width=177, height=20, pos=[28, 488],
                                callback=change_view, user_data="device_page")
                 dpg.bind_item_font(dpg.last_item(), font_bold_40)
                 dpg.bind_item_theme(dpg.last_item(), transparent_button_theme)
@@ -230,101 +230,101 @@ class MonochromUI():
                                   no_scrollbar=True, border=False):
 
                 #Left Side
-                dpg.add_text("Manual Move", pos=[40, 40])
+                dpg.add_text("Manual Move", pos=[20, 20])
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
 
                 dpg.add_text("Hold down the arrow to move the machine, or specify a new \nposition in the box to move to.",
-                             pos=[40, 109])
+                             pos=[20, 54])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                dpg.add_button(width=420, height=228, pos=[40, 229], tag="left_button", callback=self.move_monochrom)
-                dpg.add_button(width=420, height=228, pos=[500, 229], tag="right_button", callback=self.move_monochrom)
+                dpg.add_button(width=210, height=114, pos=[20, 114], tag="left_button", callback=self.move_monochrom)
+                dpg.add_button(width=210, height=114, pos=[250, 114], tag="right_button", callback=self.move_monochrom)
 
-                dpg.add_text("Current Position", pos=[40, 501])
+                dpg.add_text("Current Position", pos=[20, 250])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                dpg.add_text("1245.0", pos=[40, 559])
+                dpg.add_text("1245.0", pos=[20, 279])
                 dpg.bind_item_font(dpg.last_item(), font_regular_100)
 
-                dpg.add_text("Move to Position", pos=[486, 501])
+                dpg.add_text("Move to Position", pos=[243, 250])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                dpg.add_input_text( width=434, pos=[486, 549])
+                dpg.add_input_text( width=217, pos=[243, 274])
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
 
-                dpg.add_button(label="Go To Position", width=879, height=120, pos=[40, 734])
+                dpg.add_button(label="Go To Position", width=439, height=60, pos=[20, 367])
                 dpg.bind_item_font(dpg.last_item(), font_bold_40)
                 dpg.bind_item_theme(dpg.last_item(), input_button_theme)
 
 
                 #Right Side
-                dpg.add_text("Run a Recipe", pos=[1000, 40])
+                dpg.add_text("Run a Recipe", pos=[500, 20])
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
 
                 dpg.add_text(
                     "Enter a custom recipe to run the Optometrics software on \ncontinuously or on a cycle",
-                    pos=[1000, 109])
+                    pos=[500, 54])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                dpg.add_text("From", pos=[1004, 279])
+                dpg.add_text("From", pos=[502, 139])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
-                dpg.add_input_text(width=201, pos=[1090, 229])
+                dpg.add_input_text(width=100, pos=[545, 114])
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
-                dpg.add_text("nm", pos=[1307, 279])
+                dpg.add_text("nm", pos=[653, 139])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                dpg.add_text("To", pos=[1569, 279])
+                dpg.add_text("To", pos=[784, 139])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
-                dpg.add_input_text(width=201, pos=[1618, 229])
+                dpg.add_input_text(width=100, pos=[809, 114])
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
-                dpg.add_text("nm", pos=[1835, 279])
+                dpg.add_text("nm", pos=[917, 139])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                dpg.add_text("Delay", pos=[999, 439])
+                dpg.add_text("Delay", pos=[500, 219])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
-                dpg.add_input_text(width=201, pos=[1090, 389])
+                dpg.add_input_text(width=100, pos=[545, 194])
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
-                dpg.add_text("sec", pos=[1307, 439])
+                dpg.add_text("sec", pos=[653, 219])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                dpg.add_text("Increment", pos=[1464, 439])
+                dpg.add_text("Increment", pos=[732, 219])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
-                dpg.add_input_text(width=201, pos=[1618, 389])
+                dpg.add_input_text(width=100, pos=[809, 194])
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
-                dpg.add_text("nm", pos=[1835, 439])
+                dpg.add_text("nm", pos=[917, 219])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                dpg.add_radio_button(["Cycles", "Continuous"], pos=[1091, 549])
+                dpg.add_radio_button(["Cycles", "Continuous"], pos=[545, 274])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
                 dpg.bind_item_theme(dpg.last_item(), radio_button_theme)
 
-                dpg.add_text("Cycles", pos=[1517, 599])
+                dpg.add_text("Cycles", pos=[758, 299])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
-                dpg.add_input_text(width=201, pos=[1618, 549])
+                dpg.add_input_text(width=100, pos=[809, 274])
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
 
-                dpg.add_button(label="Run Recipe", width=879, height=120, pos=[1000, 734])
+                dpg.add_button(label="Run Recipe", width=439, height=60, pos=[500, 367])
                 dpg.bind_item_font(dpg.last_item(), font_bold_40)
                 dpg.bind_item_theme(dpg.last_item(), input_button_theme)
 
-                dpg.add_button(label="Back to Calibration Page", width=354, height=40, pos=[56, 977],
+                dpg.add_button(label="Back to Calibration Page", width=182, height=20, pos=[28, 488],
                                callback=change_view, user_data="device_page")
                 dpg.bind_item_font(dpg.last_item(), font_bold_40)
                 dpg.bind_item_theme(dpg.last_item(), transparent_button_theme)
 
-                dpg.add_button(label="Stop", width=494, height=120, pos=[713, 934])
+                dpg.add_button(label="Stop", width=247, height=60, pos=[356, 467])
                 dpg.bind_item_font(dpg.last_item(), font_bold_40)
                 dpg.bind_item_theme(dpg.last_item(), input_button_theme)
 
-                with dpg.drawlist(width=1920, height=1094):
-                    dpg.draw_line((960, 0), (960, 894), color=(201, 217, 235), thickness=3)
-                    dpg.draw_line((0, 894), (1920, 894), color=(201, 217, 235), thickness=3)
+                with dpg.drawlist(width=960, height=547):
+                    dpg.draw_line((480, 0), (480, 447), color=(201, 217, 235), thickness=3)
+                    dpg.draw_line((0, 447), (960, 447), color=(201, 217, 235), thickness=3)
 
 
                 # dpg.add_button(label="<", width=202, height=40, tag="left_button", callback=self.move_monochrom)
@@ -332,7 +332,7 @@ class MonochromUI():
 
         dpg.bind_item_theme(window, main_theme)
         dpg.bind_item_theme(header, header_theme)
-        dpg.create_viewport(title='Monochrom', width=1920, height=1200, decorated=True)
+        dpg.create_viewport(title='Monochrom', width=960, height=600, decorated=True)
 
         dpg.setup_dearpygui()
         dpg.set_viewport_vsync(True)
@@ -340,7 +340,7 @@ class MonochromUI():
 
         #dpg.show_metrics()
         dpg.show_viewport()
-        #dpg.toggle_viewport_fullscreen()
+        dpg.toggle_viewport_fullscreen()
         dpg.set_primary_window("Monochrom", True)
 
     def run(self):
