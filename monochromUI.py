@@ -40,12 +40,12 @@ def calibration_callback(sender, app_data):
         dpg.configure_item("resolution_units", show=True)
         dpg.configure_item("save_model_button", enabled=False)
         dpg.set_value("resolution_input", "")
-        dpg.configure_item("save_model_button", pos=[40, 749])
+        dpg.configure_item("save_model_button", pos=[20, 374])
     else:
         dpg.configure_item("resolution_text", show=False)
         dpg.configure_item("resolution_input", show=False)
         dpg.configure_item("resolution_units", show=False)
-        dpg.configure_item("save_model_button", pos=[40, 578])
+        dpg.configure_item("save_model_button", pos=[20, 289])
         if len(dpg.get_value("model_input")) > 0:
             dpg.configure_item("save_model_button", enabled=True)
 
