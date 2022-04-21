@@ -1,9 +1,12 @@
 import RPi.GPIO as GPIO
 import time
 
+LOW_PIN = 22
+HIGH_PIN = 23
+
 MotorDir = [
-    'forward',
     'backward',
+    'forward',
 ]
 
 ControlMode = [
@@ -55,11 +58,11 @@ class DRV8825():
         
     def TurnStep(self, Dir, steps, stepdelay=0.0000005):
         if (Dir == MotorDir[0]):
-            print("forward")
+            print("backward")
             self.digital_write(self.enable_pin, 1)
             self.digital_write(self.dir_pin, 0)
         elif (Dir == MotorDir[1]):
-            print("backward")
+            print("forward")
             self.digital_write(self.enable_pin, 1)
             self.digital_write(self.dir_pin, 1)
         else:
@@ -79,11 +82,11 @@ class DRV8825():
 
     def TurnContinous(self, dir, stepdelay=0.0000005):
         if (dir == MotorDir[0]):
-            print("forward")
+            print("backward")
             self.digital_write(self.enable_pin, 1)
             self.digital_write(self.dir_pin, 0)
         elif (dir == MotorDir[1]):
-            print("backward")
+            print("forward")
             self.digital_write(self.enable_pin, 1)
             self.digital_write(self.dir_pin, 1)
         else:
@@ -91,7 +94,14 @@ class DRV8825():
             self.digital_write(self.enable_pin, 0)
 
         while self.running_flag.value == True:
+            if (dir == MotorDir[0]) and GPIO.input(HIGH_PIN) == 0:
+                self.running_flag.value = False
+                break
+            if (dir == MotorDir[1]) and GPIO.input(LOW_PIN) == 0:
+                self.running_flag.value = False
+                break
             self.digital_write(self.step_pin, True)
             time.sleep(stepdelay)
             self.digital_write(self.step_pin, False)
             time.sleep(stepdelay)
+

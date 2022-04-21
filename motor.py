@@ -23,13 +23,13 @@ class Motor:
 
     def move_monochrom_forward_continuous(self, disable=True):
         print("move_monochrom_forward_continuous")
-        self.motor1.TurnContinous(dir='backward')
+        self.motor1.TurnContinous(dir='forward')
         if disable:
             self.motor1.Stop()
 
     def move_monochrom_backward_continuous(self, disable=True):
         print("move_monochrom_backward_continuous")
-        self.motor1.TurnContinous(dir='forward')
+        self.motor1.TurnContinous(dir='backward')
         if disable:
             self.motor1.Stop()
 
