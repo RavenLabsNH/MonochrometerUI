@@ -11,6 +11,6 @@ if __name__ == "__main__":
     GPIO.setup(HIGH_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     while(True):
-        print(GPIO.input(LOW_PIN))
-        print(GPIO.input(HIGH_PIN))
+        print("Low" + GPIO.input(LOW_PIN))
+        print("High" + GPIO.input(HIGH_PIN))
         time.sleep(2)
