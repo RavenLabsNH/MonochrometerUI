@@ -24,6 +24,8 @@ class DRV8825():
         
         GPIO.setmode(GPIO.BCM)
         GPIO.setwarnings(False)
+        GPIO.setup(LOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.setup(HIGH_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.setup(self.dir_pin, GPIO.OUT)
         GPIO.setup(self.step_pin, GPIO.OUT)
         GPIO.setup(self.enable_pin, GPIO.OUT)
