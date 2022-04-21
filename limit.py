@@ -1,7 +1,7 @@
 import RPi.GPIO as GPIO
 import time
 
-LOW_PIN = 22
+LOW_PIN = 24
 HIGH_PIN = 23
 
 if __name__ == "__main__":
