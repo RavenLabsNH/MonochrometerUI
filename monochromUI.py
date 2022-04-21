@@ -1,7 +1,7 @@
 import dearpygui.dearpygui as dpg
 import multiprocessing as mp
 import yaml
-from motor import Motor
+#from motor import Motor
 from ctypes import c_bool
 
 
@@ -83,7 +83,10 @@ class MonochromUI():
         with dpg.texture_registry():
             width, height, channels, data2 = dpg.load_image("content/logo.png")
             dpg.add_static_texture(width, height, data2, tag="logo")
-
+            width, height, channels, data2 = dpg.load_image("content/left_arrrow.png")
+            dpg.add_static_texture(width, height, data2, tag="left_arrow")
+            width, height, channels, data2 = dpg.load_image("content/right_arrow.png")
+            dpg.add_static_texture(width, height, data2, tag="right_arrow")
 
         with dpg.theme() as main_theme:
             with dpg.theme_component(dpg.mvAll):
@@ -133,10 +136,15 @@ class MonochromUI():
 
         with dpg.theme() as radio_button_theme:
             with dpg.theme_component(dpg.mvAll):
+                dpg.add_theme_color(dpg.mvThemeCol_Button, (0, 88, 182), category=dpg.mvThemeCat_Core)
                 dpg.add_theme_style(dpg.mvStyleVar_ItemSpacing, 0, 20, category=dpg.mvThemeCat_Core)
                 dpg.add_theme_style(dpg.mvStyleVar_FrameBorderSize, 1, category=dpg.mvThemeCat_Core)
+
+        with dpg.theme() as arrow_button_theme:
+            with dpg.theme_component(dpg.mvAll):
+                dpg.add_theme_style(dpg.mvStyleVar_FrameBorderSize, 1, category=dpg.mvThemeCat_Core)
+                dpg.add_theme_style(dpg.mvStyleVar_FramePadding, 80, 35, category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_Border, (0, 88, 182), category=dpg.mvThemeCat_Core)
-                dpg.add_theme_color(dpg.mvThemeCol_Button, (0, 88, 182), category=dpg.mvThemeCat_Core)
 
         with dpg.window(tag="Monochrom", width=960, height=600) as window:
             with dpg.child_window(autosize_x=True, height=53, border=False) as header:
@@ -147,7 +155,7 @@ class MonochromUI():
                     dpg.draw_line((164, 9), (164, 39), color=(201, 217, 235), thickness=3)
                     dpg.draw_line((0, 53), (1920, 53), color=(201, 217, 235), thickness=3)
 
-            with dpg.child_window(autosize_x=True, autosize_y=True, show=True, tag="device_page", border=False):
+            with dpg.child_window(autosize_x=True, autosize_y=True, show=False, tag="device_page", border=False):
                 dpg.add_text("Select a Device", pos=[20, 20])
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
 
@@ -226,7 +234,7 @@ class MonochromUI():
                 dpg.bind_item_theme(dpg.last_item(), transparent_button_theme)
 
 
-            with dpg.child_window(autosize_x=True, autosize_y=True, show=False, tag="motor_page",
+            with dpg.child_window(autosize_x=True, autosize_y=True, show=True, tag="motor_page",
                                   no_scrollbar=True, border=False):
 
                 #Left Side
@@ -237,8 +245,12 @@ class MonochromUI():
                              pos=[20, 54])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                dpg.add_button(width=210, height=114, pos=[20, 114], tag="left_button", callback=self.move_monochrom)
-                dpg.add_button(width=210, height=114, pos=[250, 114], tag="right_button", callback=self.move_monochrom)
+                dpg.add_image_button("left_arrow", width=50, height=44,
+                                     pos=[20, 114], tag="left_button", callback=self.move_monochrom)
+                dpg.bind_item_theme(dpg.last_item(), arrow_button_theme)
+                dpg.add_image_button("right_arrow", pos=[250, 114], width=50, height=44,
+                               tag="right_button", callback=self.move_monochrom)
+                dpg.bind_item_theme(dpg.last_item(), arrow_button_theme)
 
                 dpg.add_text("Current Position", pos=[20, 250])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
@@ -249,11 +261,12 @@ class MonochromUI():
                 dpg.add_text("Move to Position", pos=[243, 250])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                dpg.add_input_text( width=217, pos=[243, 274])
+                dpg.add_input_text(width=217, pos=[243, 274], callback=change_state, user_data="go_to_button")
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
 
-                dpg.add_button(label="Go To Position", width=439, height=60, pos=[20, 367])
+                dpg.add_button(label="Go To Position", width=439, height=60, pos=[20, 367],
+                               enabled=False, tag="go_to_button")
                 dpg.bind_item_font(dpg.last_item(), font_bold_40)
                 dpg.bind_item_theme(dpg.last_item(), input_button_theme)
 
@@ -326,10 +339,6 @@ class MonochromUI():
                     dpg.draw_line((480, 0), (480, 447), color=(201, 217, 235), thickness=3)
                     dpg.draw_line((0, 447), (960, 447), color=(201, 217, 235), thickness=3)
 
-
-                # dpg.add_button(label="<", width=202, height=40, tag="left_button", callback=self.move_monochrom)
-                # dpg.add_button(label=">", width=202, height=40, tag="right_button")
-
         dpg.bind_item_theme(window, main_theme)
         dpg.bind_item_theme(header, header_theme)
         dpg.create_viewport(title='Monochrom', width=960, height=600, decorated=True)
@@ -340,7 +349,7 @@ class MonochromUI():
 
         #dpg.show_metrics()
         dpg.show_viewport()
-        dpg.toggle_viewport_fullscreen()
+        #dpg.toggle_viewport_fullscreen()
         dpg.set_primary_window("Monochrom", True)
 
     def run(self):
