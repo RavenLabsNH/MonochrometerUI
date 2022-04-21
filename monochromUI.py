@@ -1,7 +1,7 @@
 import dearpygui.dearpygui as dpg
 import multiprocessing as mp
 import yaml
-#from motor import Motor
+from motor import Motor
 from ctypes import c_bool
 
 
@@ -67,9 +67,9 @@ class MonochromUI():
 
     def create_page(self):
 
-        # with dpg.handler_registry():
-        #     dpg.add_mouse_down_handler(callback=self.move_monochrom)
-        #     dpg.add_mouse_release_handler(callback=self.stop_mnonochrom)
+        with dpg.handler_registry():
+            #dpg.add_mouse_down_handler(callback=self.move_monochrom)
+            dpg.add_mouse_release_handler(callback=self.stop_mnonochrom)
 
         with dpg.font_registry():
             # first argument ids the path to the .ttf or .otf file
@@ -237,8 +237,8 @@ class MonochromUI():
                              pos=[40, 109])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                dpg.add_button(width=420, height=228, pos=[40, 229])
-                dpg.add_button(width=420, height=228, pos=[500, 229])
+                dpg.add_button(width=420, height=228, pos=[40, 229], tag="left_button", callback=self.move_monochrom)
+                dpg.add_button(width=420, height=228, pos=[500, 229], tag="right_button", callback=self.move_monochrom)
 
                 dpg.add_text("Current Position", pos=[40, 501])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
