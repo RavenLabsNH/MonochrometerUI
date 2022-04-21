@@ -10,14 +10,14 @@ class Motor:
     def move_monochrom_backward_steps(self, number_of_steps, disable=True):
         steps = int(number_of_steps)
         self.motor1.TurnStep(
-            Dir='forward', steps=steps)
+            Dir='backward', steps=steps)
         if disable:
             self.motor1.Stop()
 
     def move_monochrom_forward_steps(self, number_of_steps, disable=True):
         steps = int(number_of_steps)
         self.motor1.TurnStep(
-            Dir='backward', steps=steps)
+            Dir='forward', steps=steps)
         if disable:
             self.motor1.Stop()
 

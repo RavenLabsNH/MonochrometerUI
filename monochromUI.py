@@ -336,7 +336,7 @@ class MonochromUI():
 
         dpg.setup_dearpygui()
         dpg.set_viewport_vsync(True)
-        dpg.configure_app(wait_for_input=True)
+        dpg.configure_app(wait_for_input=False)
 
         dpg.show_metrics()
         dpg.show_viewport()
