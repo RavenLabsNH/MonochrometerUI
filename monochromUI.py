@@ -68,7 +68,7 @@ class MonochromUI():
     def create_page(self):
 
         with dpg.handler_registry():
-            #dpg.add_mouse_down_handler(callback=self.move_monochrom)
+            dpg.add_mouse_down_handler(callback=self.move_monochrom)
             dpg.add_mouse_release_handler(callback=self.stop_mnonochrom)
 
         with dpg.font_registry():
