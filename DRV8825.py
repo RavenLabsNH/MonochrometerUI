@@ -35,7 +35,6 @@ class DRV8825():
         
     def digital_write(self, pin, value):
         GPIO.output(pin, value)
-        #pass
 
     def Stop(self):
         self.digital_write(self.enable_pin, 0)
