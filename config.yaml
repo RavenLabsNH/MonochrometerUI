@@ -1,27 +1,5 @@
 profiles:
 - calibration: 100
   name: Model A
-- calibration: 200
-  name: Model B
-- calibration: 200
-  name: Model C
-- calibration: '1234'
-  name: test
-- calibration: 213
-  name: Test3
-- calibration: 25
-  name: null
-- calibration: 25
-  name: Test1
 - calibration: 50
-  name: Test2
-- calibration: 25
-  name: Test4
-- calibration: 25
-  name: jEFF
-- calibration: 200
-  name: Jef3
-- calibration: 25
-  name: Model A
-- calibration: 25
-  name: Model D
+  name: Model B

@@ -2,8 +2,11 @@ import dearpygui.dearpygui as dpg
 import multiprocessing as mp
 import yaml
 import re
-#from motor import Motor
-from ctypes import c_bool
+import time
+from motor import Motor
+from ctypes import c_bool, c_double
+
+ONE_REV = 12800
 
 def change_view(sender, app_data, user_data):
     dpg.configure_item("device_page", show=False)
@@ -66,6 +69,8 @@ class MonochromUI():
         mp.set_start_method('spawn')
         self.running_flag = mp.Value(c_bool, False)
         self.profile_names = []
+        self.current_nm = mp.Value(c_double, 0.0)
+        self.device_steps_per_nm = 0
         with open("config.yaml", "r") as stream:
             try:
                 self.config = yaml.safe_load(stream)
@@ -179,7 +184,6 @@ class MonochromUI():
                 dpg.configure_item("save_model_button", enabled=False)
 
             if str(dpg.get_value("model_input")) in user_data:
-                print("Yes")
                 dpg.configure_item("save_model_button", enabled=False)
                 dpg.bind_item_theme("model_input", bad_input_theme)
             else:
@@ -217,8 +221,9 @@ class MonochromUI():
                 dpg.add_text("Current Position", pos=[20, 213])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                dpg.add_input_text(hint="Enter Current Position", width=425, pos=[20, 237], decimal=True,
-                                   no_spaces=True, callback=change_state, user_data="calibrate_button")
+                dpg.add_input_text(hint="Enter Current Position", width=425, pos=[20, 237],
+                                   decimal=True, tag="current_position_input", no_spaces=True,
+                                   callback=change_state, user_data="calibrate_button")
                 dpg.bind_item_font(dpg.last_item(), font_regular_48)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
 
@@ -227,7 +232,7 @@ class MonochromUI():
                 dpg.bind_item_font(dpg.last_item(), font_regular_30)
 
                 dpg.add_button(label="Calibrate", width=425, height=60, pos=[20, 369], enabled=False,
-                               tag="calibrate_button", callback=change_view, user_data="motor_page")
+                               tag="calibrate_button", callback=self.calibrate)
                 dpg.bind_item_font(dpg.last_item(), font_bold_40)
                 dpg.bind_item_theme(dpg.last_item(), input_button_theme)
 
@@ -275,7 +280,6 @@ class MonochromUI():
 
             with dpg.child_window(autosize_x=True, autosize_y=True, show=False, tag="motor_page",
                                   no_scrollbar=True, border=False):
-
                 #Left Side
                 dpg.add_text("Manual Move", pos=[20, 20])
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
@@ -294,7 +298,7 @@ class MonochromUI():
                 dpg.add_text("Current Position", pos=[20, 250])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                dpg.add_text("1245.0", pos=[20, 279])
+                dpg.add_text(pos=[20, 279], tag="current_position_display")
                 dpg.bind_item_font(dpg.last_item(), font_regular_100)
 
                 dpg.add_text("Move to Position", pos=[243, 250])
@@ -368,7 +372,7 @@ class MonochromUI():
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
 
-                dpg.add_button(label="Run Recipe", width=439, height=60, pos=[500, 367],
+                dpg.add_button(label="Run Recipe", width=439, height=60, pos=[500, 367], callback=self.run_recipe,
                                enabled=False, tag="run_recipe_button")
                 dpg.bind_item_font(dpg.last_item(), font_bold_40)
                 dpg.bind_item_theme(dpg.last_item(), input_button_theme)
@@ -405,7 +409,15 @@ class MonochromUI():
         Run the main DearPyGui render thread
         """
         while dpg.is_dearpygui_running():
+            dpg.set_value("current_position_display", "{:04.1F}".format(self.current_nm.value))
             dpg.render_dearpygui_frame()
+
+    def calibrate(self):
+        selected = list(filter(lambda item: item['name'] == dpg.get_value("model_combo"), self.config["profiles"]))
+        self.device_steps_per_nm = ONE_REV / selected[0]['calibration']
+        self.current_nm.value = float(dpg.get_value("current_position_input"))
+        print(self.device_steps_per_nm)
+        change_view(None, None, user_data="motor_page")
 
     def create_profile(self):
         name = dpg.get_value("model_input")
@@ -430,7 +442,63 @@ class MonochromUI():
         dpg.configure_item("model_combo", items=self.profile_names)
         change_view(None, None, "device_page")
 
+    def run_recipe(self):
+        _from = float(dpg.get_value("from_input"))
+        _to = float(dpg.get_value("to_input"))
+        _delay_input = float(dpg.get_value("delay_input"))
+        _increment_input = int(dpg.get_value("increment_input"))
+        _cycle_input = int(dpg.get_value("cycles_input"))
+        is_continuous = dpg.get_value("radio_input") == "Continuous"
 
+        self.running_flag.value = True
+
+        run_process = mp.Process(target=self.run_recipe_process, args=(_from, _to, _delay_input, _increment_input,
+                                                                       _cycle_input, is_continuous,))
+
+        run_process.start()
+
+    def run_recipe_process(self, _from, _to, _delay_input, _increment_input, _cycle_input, is_continuous):
+        completed_cycles = 0
+        motor = Motor(self.running_flag, self.current_nm, self.device_steps_per_nm)
+
+        while self.running_flag.value:
+            travel_to_start_distance = abs(self.current_nm.value - _from)
+
+            if travel_to_start_distance > 0:
+                motor.move_monochrom_backward_steps(travel_to_start_distance * self.device_steps_per_nm)
+                time.sleep(_delay_input)
+
+            elif travel_to_start_distance < 0:
+                motor.move_monochrom_forward_steps(travel_to_start_distance * self.device_steps_per_nm)
+                time.sleep(_delay_input)
+
+            total_distance = _to - _from
+            if total_distance == 0:
+                self.running_flag.value = False
+                return
+
+            increments = int(total_distance / _increment_input)
+
+            for x in range(0, increments):
+                if total_distance > 0:
+                    motor.move_monochrom_forward_steps(_increment_input * self.device_steps_per_nm)
+                else:
+                    motor.move_monochrom_backward_steps(_increment_input * self.device_steps_per_nm)
+
+                # move motor _increment_input
+                time.sleep(_delay_input)
+
+            remaining = _to - (_from + (increments * _increment_input))
+            if total_distance > 0:
+                motor.move_monochrom_forward_steps(remaining * self.device_steps_per_nm)
+            else:
+                motor.move_monochrom_backward_steps(remaining * self.device_steps_per_nm)
+
+
+            if not is_continuous:
+                completed_cycles = completed_cycles + 1
+                if completed_cycles >= _cycle_input:
+                    self.running_flag.value = False
 
     def move_monochrom(self):
         if dpg.is_item_active("left_button") and self.running_flag.value is False:
@@ -443,11 +511,11 @@ class MonochromUI():
             forward_process.start()
 
     def move_process_forward(self):
-        motor = Motor(self.running_flag)
+        motor = Motor(self.running_flag, self.current_nm, self.device_steps_per_nm)
         motor.move_monochrom_forward_continuous()
 
     def move_process_backward(self):
-        motor = Motor(self.running_flag)
+        motor = Motor(self.running_flag, self.current_nm, self.device_steps_per_nm)
         motor.move_monochrom_backward_continuous()
 
     def stop_mnonochrom(self):
