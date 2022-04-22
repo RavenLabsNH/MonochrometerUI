@@ -1,9 +1,9 @@
 import dearpygui.dearpygui as dpg
 import multiprocessing as mp
 import yaml
+import re
 #from motor import Motor
 from ctypes import c_bool
-
 
 def change_view(sender, app_data, user_data):
     dpg.configure_item("device_page", show=False)
@@ -11,26 +11,27 @@ def change_view(sender, app_data, user_data):
     dpg.configure_item("motor_page", show=False)
     dpg.configure_item(user_data, show=True)
 
+def is_valid_data(name):
+    return len(dpg.get_value(name)) > 0
+
 def change_state(sender, app_data, user_data):
-    val = dpg.get_value(sender)
-    if len(val) > 0:
+    if is_valid_data(sender):
         dpg.configure_item(user_data, enabled=True)
     else:
         dpg.configure_item(user_data, enabled=False)
 
-def change_state_create(sender, app_data):
-    if len(dpg.get_value("model_input")) > 0:
-        state = dpg.get_item_configuration("resolution_input")
-        if state['show'] is True:
-            if len(dpg.get_value("resolution_input")) > 0:
-                dpg.configure_item("save_model_button", enabled=True)
-            else:
-                dpg.configure_item("save_model_button", enabled=False)
+def change_state_recipe(sender, app_data):
+    if is_valid_data("from_input") and is_valid_data("to_input") and is_valid_data("delay_input")\
+            and is_valid_data("increment_input"):
+        if dpg.get_value("radio_input") == "Continuous":
+            dpg.configure_item("run_recipe_button", enabled=True)
+        elif is_valid_data("cycles_input"):
+            dpg.configure_item("run_recipe_button", enabled=True)
         else:
-            dpg.configure_item("save_model_button", enabled=True)
-    else:
-        dpg.configure_item("save_model_button", enabled=False)
+            dpg.configure_item("run_recipe_button", enabled=False)
 
+    else:
+        dpg.configure_item("run_recipe_button", enabled=False)
 
 def calibration_callback(sender, app_data):
     val = dpg.get_value(sender)
@@ -49,6 +50,16 @@ def calibration_callback(sender, app_data):
         if len(dpg.get_value("model_input")) > 0:
             dpg.configure_item("save_model_button", enabled=True)
 
+def recipe_callback(sender, app_data):
+    if dpg.get_value("radio_input") == "Continuous":
+        dpg.configure_item("cycles_input", enabled=False)
+        dpg.set_value("cycles_input", "")
+        change_state_recipe(None, None)
+    else:
+        dpg.configure_item("cycles_input", enabled=True)
+        change_state_recipe(None, None)
+
+
 class MonochromUI():
     def __init__(self):
         dpg.create_context()
@@ -63,7 +74,6 @@ class MonochromUI():
                 exit()
         for profile in self.config["profiles"]:
             self.profile_names.append(profile['name'])
-
 
     def create_page(self):
 
@@ -104,18 +114,26 @@ class MonochromUI():
                 dpg.add_theme_style(dpg.mvStyleVar_ItemSpacing, 0, 0, category=dpg.mvThemeCat_Core)
                 dpg.add_theme_style(dpg.mvStyleVar_FrameRounding, 8, category=dpg.mvThemeCat_Core)
 
-
         with dpg.theme() as header_theme:
             with dpg.theme_component(dpg.mvAll):
                 dpg.add_theme_color(dpg.mvThemeCol_ChildBg, (255, 255, 255), category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_Text, (0, 88, 182), category=dpg.mvThemeCat_Core)
 
         with dpg.theme() as input_theme:
-            with dpg.theme_component(dpg.mvAll):
+            with dpg.theme_component(dpg.mvAll, enabled_state=True):
                 dpg.add_theme_style(dpg.mvStyleVar_FramePadding, 7, 15, category=dpg.mvThemeCat_Core)
                 dpg.add_theme_style(dpg.mvStyleVar_ItemSpacing, 0, 10, category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_Button, (255, 255, 255), category=dpg.mvThemeCat_Core)
-                dpg.add_theme_color(dpg.mvThemeCol_FrameBgActive, (244, 248, 252), category=dpg.mvThemeCat_Core)
+                dpg.add_theme_color(dpg.mvThemeCol_ScrollbarBg, (255, 255, 255), category=dpg.mvThemeCat_Core)
+            with dpg.theme_component(dpg.mvAll, enabled_state=False):
+                dpg.add_theme_style(dpg.mvStyleVar_FramePadding, 7, 15, category=dpg.mvThemeCat_Core)
+                dpg.add_theme_color(dpg.mvThemeCol_FrameBg, (237, 237, 242), category=dpg.mvThemeCat_Core)
+
+        with dpg.theme() as bad_input_theme:
+            with dpg.theme_component(dpg.mvAll):
+                dpg.add_theme_style(dpg.mvStyleVar_FramePadding, 7, 15, category=dpg.mvThemeCat_Core)
+                dpg.add_theme_color(dpg.mvThemeCol_Border, (255, 0, 0), category=dpg.mvThemeCat_Core)
+                dpg.add_theme_style(dpg.mvStyleVar_FrameBorderSize, 1, category=dpg.mvThemeCat_Core)
 
         with dpg.theme() as input_button_theme:
             with dpg.theme_component(dpg.mvAll, enabled_state=True):
@@ -146,6 +164,28 @@ class MonochromUI():
                 dpg.add_theme_style(dpg.mvStyleVar_FramePadding, 80, 35, category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_Border, (0, 88, 182), category=dpg.mvThemeCat_Core)
 
+        def change_state_create(sender, app_data, user_data):
+
+            if is_valid_data("model_input"):
+                state = dpg.get_item_configuration("resolution_input")
+                if state['show'] is True:
+                    if is_valid_data("resolution_input"):
+                        dpg.configure_item("save_model_button", enabled=True)
+                    else:
+                        dpg.configure_item("save_model_button", enabled=False)
+                else:
+                    dpg.configure_item("save_model_button", enabled=True)
+            else:
+                dpg.configure_item("save_model_button", enabled=False)
+
+            if str(dpg.get_value("model_input")) in user_data:
+                print("Yes")
+                dpg.configure_item("save_model_button", enabled=False)
+                dpg.bind_item_theme("model_input", bad_input_theme)
+            else:
+                dpg.configure_item("save_model_button", enabled=True)
+                dpg.bind_item_theme("model_input", input_theme)
+
         with dpg.window(tag="Monochrom", width=960, height=600) as window:
             with dpg.child_window(autosize_x=True, height=53, border=False) as header:
                 dpg.add_image("logo", pos=[8, 8], width=140, height=38)
@@ -155,14 +195,14 @@ class MonochromUI():
                     dpg.draw_line((164, 9), (164, 39), color=(201, 217, 235), thickness=3)
                     dpg.draw_line((0, 53), (1920, 53), color=(201, 217, 235), thickness=3)
 
-            with dpg.child_window(autosize_x=True, autosize_y=True, show=False, tag="device_page", border=False):
+            with dpg.child_window(autosize_x=True, autosize_y=True, show=True, tag="device_page", border=False):
                 dpg.add_text("Select a Device", pos=[20, 20])
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
 
                 dpg.add_text("Model Number", pos=[20, 73])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                dpg.add_combo(self.profile_names, default_value="Model A", pos=[20, 97], width=425)
+                dpg.add_combo(self.profile_names, default_value="Model A", pos=[20, 97], width=425, tag="model_combo")
                 dpg.bind_item_font(dpg.last_item(), font_regular_48)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
 
@@ -199,14 +239,14 @@ class MonochromUI():
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
                 dpg.add_input_text(hint="Enter Model", width=425, pos=[20, 86],
-                                   callback=change_state_create, tag="model_input")
+                                   callback=change_state_create, user_data=self.profile_names, tag="model_input")
                 dpg.bind_item_font(dpg.last_item(), font_regular_48)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
 
                 dpg.add_text("Calibration", pos=[20, 166])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                dpg.add_combo(["25 nm/rev", "50 nm/rev", "100 nm/rev", "200 nm/rev", "Custom"],
+                dpg.add_combo(["25 nm/rev", "50 nm/rev", "100 nm/rev", "200 nm/rev", "Custom"], tag="combo_input",
                               default_value="25 nm/rev", pos=[20, 190], width=425, callback=calibration_callback)
                 dpg.bind_item_font(dpg.last_item(), font_regular_48)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
@@ -216,7 +256,7 @@ class MonochromUI():
 
                 dpg.add_input_text(hint="Enter Custom Resolution", width=425, pos=[20, 294], decimal=True,
                                    show=False, no_spaces=True, callback=change_state_create,
-                                   user_data="calibrate_button", tag="resolution_input")
+                                   user_data=self.profile_names, tag="resolution_input")
                 dpg.bind_item_font(dpg.last_item(), font_regular_48)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
 
@@ -233,8 +273,7 @@ class MonochromUI():
                 dpg.bind_item_font(dpg.last_item(), font_bold_40)
                 dpg.bind_item_theme(dpg.last_item(), transparent_button_theme)
 
-
-            with dpg.child_window(autosize_x=True, autosize_y=True, show=True, tag="motor_page",
+            with dpg.child_window(autosize_x=True, autosize_y=True, show=False, tag="motor_page",
                                   no_scrollbar=True, border=False):
 
                 #Left Side
@@ -261,7 +300,8 @@ class MonochromUI():
                 dpg.add_text("Move to Position", pos=[243, 250])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                dpg.add_input_text(width=217, pos=[243, 274], callback=change_state, user_data="go_to_button")
+                dpg.add_input_text(width=217, pos=[243, 274], decimal=True,
+                                   callback=change_state, user_data="go_to_button")
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
 
@@ -276,13 +316,14 @@ class MonochromUI():
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
 
                 dpg.add_text(
-                    "Enter a custom recipe to run the Optometrics software on \ncontinuously or on a cycle",
+                    "Enter a custom recipe to run the Optometrics software \ncontinuously or on a cycle",
                     pos=[500, 54])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
                 dpg.add_text("From", pos=[502, 139])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
-                dpg.add_input_text(width=100, pos=[545, 114])
+                dpg.add_input_text(width=100, pos=[545, 114], tag="from_input", decimal=True,
+                                   callback=change_state_recipe)
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
                 dpg.add_text("nm", pos=[653, 139])
@@ -290,7 +331,8 @@ class MonochromUI():
 
                 dpg.add_text("To", pos=[784, 139])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
-                dpg.add_input_text(width=100, pos=[809, 114])
+                dpg.add_input_text(width=100, pos=[809, 114], tag="to_input", decimal=True,
+                                   callback=change_state_recipe)
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
                 dpg.add_text("nm", pos=[917, 139])
@@ -298,31 +340,36 @@ class MonochromUI():
 
                 dpg.add_text("Delay", pos=[500, 219])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
-                dpg.add_input_text(width=100, pos=[545, 194])
+                dpg.add_input_text(width=100, pos=[545, 194], tag="delay_input", decimal=True,
+                                   callback=change_state_recipe)
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
                 dpg.add_text("sec", pos=[653, 219])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                dpg.add_text("Increment", pos=[732, 219])
+                dpg.add_text("Increment", pos=[731, 219])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
-                dpg.add_input_text(width=100, pos=[809, 194])
+                dpg.add_input_text(width=100, pos=[809, 194], tag="increment_input", decimal=True,
+                                   callback=change_state_recipe)
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
                 dpg.add_text("nm", pos=[917, 219])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                dpg.add_radio_button(["Cycles", "Continuous"], pos=[545, 274])
+                dpg.add_radio_button(["Cycles", "Continuous"], pos=[545, 274],
+                                     tag="radio_input", callback=recipe_callback)
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
                 dpg.bind_item_theme(dpg.last_item(), radio_button_theme)
 
                 dpg.add_text("Cycles", pos=[758, 299])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
-                dpg.add_input_text(width=100, pos=[809, 274])
+                dpg.add_input_text(width=100, pos=[809, 274], tag="cycles_input", decimal=True,
+                                   callback=change_state_recipe)
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
 
-                dpg.add_button(label="Run Recipe", width=439, height=60, pos=[500, 367])
+                dpg.add_button(label="Run Recipe", width=439, height=60, pos=[500, 367],
+                               enabled=False, tag="run_recipe_button")
                 dpg.bind_item_font(dpg.last_item(), font_bold_40)
                 dpg.bind_item_theme(dpg.last_item(), input_button_theme)
 
@@ -352,6 +399,7 @@ class MonochromUI():
         #dpg.toggle_viewport_fullscreen()
         dpg.set_primary_window("Monochrom", True)
 
+
     def run(self):
         """
         Run the main DearPyGui render thread
@@ -360,8 +408,12 @@ class MonochromUI():
             dpg.render_dearpygui_frame()
 
     def create_profile(self):
-        name = dpg.get_value("input_name")
-        calibration = int(dpg.get_value("input_calibration"))
+        name = dpg.get_value("model_input")
+        combo_input = dpg.get_value("combo_input")
+        if combo_input == "Custom":
+            calibration = int(dpg.get_value("input_calibration"))
+        else:
+            calibration = int(re.search(r'\d+', combo_input).group())
 
         dict_data = {'name': name, 'calibration': calibration}
         self.config["profiles"].append(dict_data)
@@ -369,9 +421,14 @@ class MonochromUI():
         with open("config.yaml", "w") as stream:
             try:
                 yaml.safe_dump(self.config, stream)
+                self.profile_names.clear()
+                for profile in self.config["profiles"]:
+                    self.profile_names.append(profile['name'])
             except yaml.YAMLError as exc:
                 print("Error reading config file")
-                exit()
+
+        dpg.configure_item("model_combo", items=self.profile_names)
+        change_view(None, None, "device_page")
 
 
 
