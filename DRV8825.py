@@ -1,4 +1,9 @@
-import RPi.GPIO as GPIO
+import platform
+if platform.machine() == 'AMD64':
+    PI = False
+
+if PI:
+    import RPi.GPIO as GPIO
 import time
 
 LOW_PIN = 25
@@ -23,18 +28,21 @@ class DRV8825():
         self.running_flag = running_flag
         self.current_position = current_position
         self.steps_per_nm = steps_per_nm
-        
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setwarnings(False)
-        GPIO.setup(LOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.setup(HIGH_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.setup(self.dir_pin, GPIO.OUT)
-        GPIO.setup(self.step_pin, GPIO.OUT)
-        GPIO.setup(self.enable_pin, GPIO.OUT)
-        GPIO.setup(self.mode_pins, GPIO.OUT)
+
+        if PI:
+            GPIO.setmode(GPIO.BCM)
+            GPIO.setwarnings(False)
+            GPIO.setup(LOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+            GPIO.setup(HIGH_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+            GPIO.setup(self.dir_pin, GPIO.OUT)
+            GPIO.setup(self.step_pin, GPIO.OUT)
+            GPIO.setup(self.enable_pin, GPIO.OUT)
+            GPIO.setup(self.mode_pins, GPIO.OUT)
         
     def digital_write(self, pin, value):
-        GPIO.output(pin, value)
+        if PI:
+            GPIO.output(pin, value)
+        pass
 
     def Stop(self):
         self.digital_write(self.enable_pin, 0)
@@ -79,14 +87,17 @@ class DRV8825():
             
         print("turn step: " + str(steps))
         for i in range(steps):
-            if (Dir == MotorDir[0]) and GPIO.input(LOW_PIN) == 0:
-                self.running_flag.value = False
-                print("Low triggerd: " + MotorDir[0] + " " + str(GPIO.input(LOW_PIN)))
+            if self.running_flag.value is not True:
                 break
-            if (Dir == MotorDir[1]) and GPIO.input(HIGH_PIN) == 0:
-                self.running_flag.value = False
-                print("High triggerd " + MotorDir[1] + " " + str(GPIO.input(HIGH_PIN)))
-                break
+            if PI:
+                if (Dir == MotorDir[0]) and GPIO.input(LOW_PIN) == 0:
+                    self.running_flag.value = False
+                    print("Low triggerd: " + MotorDir[0] + " " + str(GPIO.input(LOW_PIN)))
+                    break
+                if (Dir == MotorDir[1]) and GPIO.input(HIGH_PIN) == 0:
+                    self.running_flag.value = False
+                    print("High triggerd " + MotorDir[1] + " " + str(GPIO.input(HIGH_PIN)))
+                    break
             self.digital_write(self.step_pin, True)
             time.sleep(stepdelay)
             self.digital_write(self.step_pin, False)
@@ -94,6 +105,7 @@ class DRV8825():
                 self.current_position.value = self.current_position.value - (1 / self.steps_per_nm)
             else:
                 self.current_position.value = self.current_position.value + (1 / self.steps_per_nm)
+
 
     def TurnContinous(self, dir, stepdelay=0.0000005):
         if (dir == MotorDir[0]):
@@ -109,14 +121,15 @@ class DRV8825():
             self.digital_write(self.enable_pin, 0)
 
         while self.running_flag.value == True:
-            if (dir == MotorDir[0]) and GPIO.input(LOW_PIN) == 0:
-                self.running_flag.value = False
-                print("Low triggerd: " + MotorDir[0] + " " + str(GPIO.input(LOW_PIN)))
-                break
-            if (dir == MotorDir[1]) and GPIO.input(HIGH_PIN) == 0:
-                self.running_flag.value = False
-                print("High triggerd " + MotorDir[1] + " " + str(GPIO.input(HIGH_PIN)))
-                break
+            if PI:
+                if (dir == MotorDir[0]) and GPIO.input(LOW_PIN) == 0:
+                    self.running_flag.value = False
+                    print("Low triggerd: " + MotorDir[0] + " " + str(GPIO.input(LOW_PIN)))
+                    break
+                if (dir == MotorDir[1]) and GPIO.input(HIGH_PIN) == 0:
+                    self.running_flag.value = False
+                    print("High triggerd " + MotorDir[1] + " " + str(GPIO.input(HIGH_PIN)))
+                    break
             self.digital_write(self.step_pin, True)
             time.sleep(stepdelay)
             self.digital_write(self.step_pin, False)
@@ -124,4 +137,3 @@ class DRV8825():
                 self.current_position.value = self.current_position.value - (1/self.steps_per_nm)
             else:
                 self.current_position.value = self.current_position.value + (1 / self.steps_per_nm)
-
