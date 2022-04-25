@@ -1,6 +1,8 @@
 import platform
 if platform.machine() == 'AMD64':
     PI = False
+else:
+    PI = True
 
 if PI:
     import RPi.GPIO as GPIO
