@@ -490,7 +490,7 @@ class MonochromUI():
             dpg.toggle_viewport_fullscreen()
         dpg.set_primary_window("Monochrom", True)
 
-        timer = Timer(7, change_view, (None, None, "device_page"))
+        timer = Timer(10, change_view, (None, None, "device_page"))
         timer.start()
 
 
