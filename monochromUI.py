@@ -113,6 +113,7 @@ class MonochromUI():
         self.profile_names = []
         self.current_nm = mp.Value(c_double, 0.0)
         self.device_steps_per_nm = 0
+        self.command_queue = mp.Queue()
         self.free_motor()
         with open("config.yaml", "r") as stream:
             try:
@@ -141,7 +142,7 @@ class MonochromUI():
         with dpg.texture_registry():
             width, height, channels, data2 = dpg.load_image("content/logo.png")
             dpg.add_static_texture(width, height, data2, tag="logo")
-            width, height, channels, data2 = dpg.load_image("content/left_arrrow.png")
+            width, height, channels, data2 = dpg.load_image("content/left_arrow.png")
             dpg.add_static_texture(width, height, data2, tag="left_arrow")
             width, height, channels, data2 = dpg.load_image("content/right_arrow.png")
             dpg.add_static_texture(width, height, data2, tag="right_arrow")
@@ -196,6 +197,18 @@ class MonochromUI():
                 dpg.add_theme_style(dpg.mvStyleVar_FrameBorderSize, 0, category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_Text, (130, 135, 145), category=dpg.mvThemeCat_Core)
 
+        with dpg.theme() as stop_button_theme:
+            with dpg.theme_component(dpg.mvAll, enabled_state=True):
+                dpg.add_theme_color(dpg.mvThemeCol_Button, (220, 46, 7), category=dpg.mvThemeCat_Core)
+                dpg.add_theme_color(dpg.mvThemeCol_ButtonHovered, (220, 46, 7), category=dpg.mvThemeCat_Core)
+                dpg.add_theme_style(dpg.mvStyleVar_FrameBorderSize, 0, category=dpg.mvThemeCat_Core)
+                dpg.add_theme_color(dpg.mvThemeCol_Text, (255, 255, 255), category=dpg.mvThemeCat_Core)
+            with dpg.theme_component(dpg.mvAll, enabled_state=False):
+                dpg.add_theme_color(dpg.mvThemeCol_Button, (232, 237, 242), category=dpg.mvThemeCat_Core)
+                dpg.add_theme_color(dpg.mvThemeCol_ButtonHovered, (232, 237, 242), category=dpg.mvThemeCat_Core)
+                dpg.add_theme_style(dpg.mvStyleVar_FrameBorderSize, 0, category=dpg.mvThemeCat_Core)
+                dpg.add_theme_color(dpg.mvThemeCol_Text, (130, 135, 145), category=dpg.mvThemeCat_Core)
+
         with dpg.theme() as transparent_button_theme:
             with dpg.theme_component(dpg.mvAll):
                 dpg.add_theme_color(dpg.mvThemeCol_Button, (244, 248, 252), category=dpg.mvThemeCat_Core)
@@ -217,9 +230,15 @@ class MonochromUI():
                 dpg.add_theme_style(dpg.mvStyleVar_FrameBorderSize, 1, category=dpg.mvThemeCat_Core)
 
         with dpg.theme() as arrow_button_theme:
-            with dpg.theme_component(dpg.mvAll):
+            with dpg.theme_component(dpg.mvAll, enabled_state=True):
                 dpg.add_theme_style(dpg.mvStyleVar_FrameBorderSize, 1, category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_ButtonHovered, (255, 255, 255), category=dpg.mvThemeCat_Core)
+                dpg.add_theme_style(dpg.mvStyleVar_FramePadding, 80, 35, category=dpg.mvThemeCat_Core)
+                dpg.add_theme_color(dpg.mvThemeCol_Border, (0, 88, 182), category=dpg.mvThemeCat_Core)
+            with dpg.theme_component(dpg.mvAll, enabled_state=False):
+                dpg.add_theme_color(dpg.mvThemeCol_Button, (232, 237, 242), category=dpg.mvThemeCat_Core)
+                dpg.add_theme_style(dpg.mvStyleVar_FrameBorderSize, 1, category=dpg.mvThemeCat_Core)
+                dpg.add_theme_color(dpg.mvThemeCol_ButtonHovered, (232, 237, 242), category=dpg.mvThemeCat_Core)
                 dpg.add_theme_style(dpg.mvStyleVar_FramePadding, 80, 35, category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_Border, (0, 88, 182), category=dpg.mvThemeCat_Core)
 
@@ -273,10 +292,14 @@ class MonochromUI():
                                callback=create_msg_popup)
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
                 dpg.bind_item_theme(dpg.last_item(), power_off_button_theme)
+                with dpg.drawlist(width=960, height=53):
+                    dpg.draw_line((164, 9), (164, 39), color=(201, 217, 235), thickness=3)
+                    dpg.draw_line((0, 52), (1920, 52), color=(201, 217, 235), thickness=3)
 
             with dpg.child_window(autosize_x=True, autosize_y=True, show=True, tag="home_page", border=False):
-                dpg.add_image("logo", pos=[300, 200], width=140, height=38)
-                dpg.add_text("Software Version: 1.0.1", pos=[300, 250])
+                dpg.add_image("logo", pos=[300, 200], width=280, height=76)
+                dpg.add_text("Software Version: 1.0.1", pos=[300, 280])
+                dpg.bind_item_font(dpg.last_item(), font_regular_48)
 
             with dpg.child_window(autosize_x=True, autosize_y=True, show=False, tag="device_page", border=False):
                 dpg.add_text("Select a Device", pos=[20, 20])
@@ -467,9 +490,10 @@ class MonochromUI():
                 dpg.bind_item_font(dpg.last_item(), font_bold_40)
                 dpg.bind_item_theme(dpg.last_item(), transparent_button_theme)
 
-                dpg.add_button(label="Stop", width=247, height=60, pos=[356, 467], callback=self.stop_monochrom)
+                dpg.add_button(label="Stop", width=247, height=60, pos=[356, 467], enabled=False,
+                               tag="stop_button", callback=self.stop_monochrom)
                 dpg.bind_item_font(dpg.last_item(), font_bold_40)
-                dpg.bind_item_theme(dpg.last_item(), input_button_theme)
+                dpg.bind_item_theme(dpg.last_item(), stop_button_theme)
 
                 with dpg.drawlist(width=960, height=547):
                     dpg.draw_line((480, 0), (480, 447), color=(201, 217, 235), thickness=3)
@@ -490,7 +514,7 @@ class MonochromUI():
             dpg.toggle_viewport_fullscreen()
         dpg.set_primary_window("Monochrom", True)
 
-        timer = Timer(10, change_view, (None, None, "device_page"))
+        timer = Timer(100, change_view, (None, None, "device_page"))
         timer.start()
 
 
@@ -500,6 +524,8 @@ class MonochromUI():
         Run the main DearPyGui render thread
         """
         while dpg.is_dearpygui_running():
+            if self.command_queue.qsize() > 0:
+               self.process_queue()
             dpg.set_value("current_position_display", "{:06.1F}".format(self.current_nm.value))
             dpg.render_dearpygui_frame()
 
@@ -537,6 +563,8 @@ class MonochromUI():
 
         if self.running_flag.value:
             return
+
+        self.command_queue.put("Start")
         self.running_flag.value = True
 
         run_process = mp.Process(target=self.move_to_process, args=(move_to,))
@@ -551,6 +579,8 @@ class MonochromUI():
 
         elif distance < 0:
             motor.move_monochrom_forward_steps(abs(distance) * self.device_steps_per_nm)
+        self.command_queue.put("Stop")
+        self.running_flag.value = False
 
     def run_recipe(self):
         if self.running_flag.value:
@@ -568,6 +598,7 @@ class MonochromUI():
             _cycle_input = 0
 
         self.running_flag.value = True
+        self.command_queue.put("Start")
 
         run_process = mp.Process(target=self.run_recipe_process, args=(_from, _to, _delay_input, _increment_input,
                                                                        _cycle_input, is_continuous,))
@@ -591,19 +622,22 @@ class MonochromUI():
             total_distance = _to - _from
             if total_distance == 0:
                 self.running_flag.value = False
-                return
+                break
 
             increments = int(total_distance / _increment_input)
 
             for x in range(0, increments):
+                if self.running_flag.value is not True:
+                    break
                 if total_distance > 0:
                     motor.move_monochrom_forward_steps(_increment_input * self.device_steps_per_nm)
                 else:
                     motor.move_monochrom_backward_steps(_increment_input * self.device_steps_per_nm)
 
-                # move motor _increment_input
                 time.sleep(_delay_input)
 
+            if self.running_flag.value is not True:
+                break
             remaining = _to - (_from + (increments * _increment_input))
             if total_distance > 0:
                 motor.move_monochrom_forward_steps(remaining * self.device_steps_per_nm)
@@ -615,6 +649,8 @@ class MonochromUI():
                 completed_cycles = completed_cycles + 1
                 if completed_cycles >= _cycle_input:
                     self.running_flag.value = False
+        self.command_queue.put("Stop")
+        self.running_flag.value = False
 
     def move_monochrom(self):
         if self.running_flag.value:
@@ -622,10 +658,12 @@ class MonochromUI():
 
         if dpg.is_item_active("left_button") and self.running_flag.value is False:
             self.running_flag.value = True
+            self.command_queue.put("Start")
             backward_process = mp.Process(target=self.move_process_backward)
             backward_process.start()
         elif dpg.is_item_active("right_button") and self.running_flag.value is False:
             self.running_flag.value = True
+            self.command_queue.put("Start")
             forward_process = mp.Process(target=self.move_process_forward)
             forward_process.start()
 
@@ -642,9 +680,24 @@ class MonochromUI():
             self.stop_monochrom()
 
     def stop_monochrom(self):
-        print("stop")
+        self.command_queue.put("Stop")
         self.running_flag.value = False
 
     def free_motor(self):
         motor = Motor(self.running_flag, self.current_nm, self.device_steps_per_nm)
         motor.stop_motor()
+
+    def process_queue(self):
+        command = self.command_queue.get()
+        if command == "Start":
+            dpg.configure_item("run_recipe_button", enabled=False)
+            dpg.configure_item("go_to_button", enabled=False)
+            dpg.configure_item("left_button", enabled=False)
+            dpg.configure_item("right_button", enabled=False)
+            dpg.configure_item("stop_button", enabled=True)
+        elif command == "Stop":
+            change_state_recipe(None, None)
+            change_state("move_to_input", None, "go_to_button")
+            dpg.configure_item("left_button", enabled=True)
+            dpg.configure_item("right_button", enabled=True)
+            dpg.configure_item("stop_button", enabled=False)
