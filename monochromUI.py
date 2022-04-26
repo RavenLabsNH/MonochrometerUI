@@ -655,10 +655,11 @@ class MonochromUI():
             remaining = _to - (_from + (increments * _increment_input))
             if total_distance > 0:
                 motor.move_monochrom_forward_steps(remaining * self.device_steps_per_nm)
+                time.sleep(_delay_input)
             else:
                 motor.move_monochrom_backward_steps(remaining * self.device_steps_per_nm)
-
-
+                time.sleep(_delay_input)
+                
             if not is_continuous:
                 completed_cycles = completed_cycles + 1
                 if completed_cycles >= _cycle_input:
