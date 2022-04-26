@@ -114,7 +114,7 @@ class MonochromUI():
         self.current_nm = mp.Value(c_double, 0.0)
         self.device_steps_per_nm = 0
         self.free_motor()
-        with open("/home/pi/MonochrometerUI/config.yaml", "r") as stream:
+        with open("config.yaml", "r") as stream:
             try:
                 self.config = yaml.safe_load(stream)
             except yaml.YAMLError as exc:
@@ -260,7 +260,7 @@ class MonochromUI():
                                    callback=lambda sender, app_data, user_data: dpg.delete_item("test_popup"))
                     dpg.bind_item_font(dpg.last_item(), font_regular_32)
                     dpg.add_button(label="Yes", width=95, height=50, indent=220,
-                                   callback=lambda: subprocess.run(["shutdown"]))
+                                   callback=lambda: subprocess.Popen(['shutdown','-h','now']))
                     dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
         with dpg.window(tag="Monochrom", width=960, height=600) as window:
