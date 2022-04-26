@@ -113,7 +113,8 @@ class MonochromUI():
         self.profile_names = []
         self.current_nm = mp.Value(c_double, 0.0)
         self.device_steps_per_nm = 0
-        with open("config.yaml", "r") as stream:
+        self.free_motor()
+        with open("/home/pi/MonochrometerUI/config.yaml", "r") as stream:
             try:
                 self.config = yaml.safe_load(stream)
             except yaml.YAMLError as exc:
@@ -254,11 +255,12 @@ class MonochromUI():
                 dpg.bind_item_font(dpg.last_item(), font_regular_48)
                 dpg.add_spacer(height=25)
                 with dpg.group(horizontal=True):
-                    dpg.add_button(label="Yes", width=95, height=50, indent=40,
-                                   callback=lambda: subprocess.run(["shutdown"]))
-                    dpg.bind_item_font(dpg.last_item(), font_regular_32)
-                    dpg.add_button(label="Cancel", width=95, height=50, indent=220, user_data=("test_popup", True),
+
+                    dpg.add_button(label="Cancel", width=95, height=50, indent=40, user_data=("test_popup", True),
                                    callback=lambda sender, app_data, user_data: dpg.delete_item("test_popup"))
+                    dpg.bind_item_font(dpg.last_item(), font_regular_32)
+                    dpg.add_button(label="Yes", width=95, height=50, indent=220,
+                                   callback=lambda: subprocess.run(["shutdown"]))
                     dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
         with dpg.window(tag="Monochrom", width=960, height=600) as window:
@@ -492,6 +494,7 @@ class MonochromUI():
         timer.start()
 
 
+
     def run(self):
         """
         Run the main DearPyGui render thread
@@ -637,3 +640,7 @@ class MonochromUI():
     def stop_monochrom(self):
         print("stop")
         self.running_flag.value = False
+
+    def free_motor(self):
+        motor = Motor(self.running_flag, self.current_nm, self.device_steps_per_nm)
+        motor.stop_motor()
