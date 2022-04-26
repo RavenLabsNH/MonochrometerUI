@@ -562,7 +562,7 @@ class MonochromUI():
         _increment_input = int(dpg.get_value("increment_input"))
 
         is_continuous = dpg.get_value("radio_input") == "Continuous"
-        if is_continuous:
+        if not is_continuous:
             _cycle_input = int(dpg.get_value("cycles_input"))
         else:
             _cycle_input = 0
