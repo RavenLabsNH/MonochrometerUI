@@ -490,7 +490,7 @@ class MonochromUI():
             dpg.toggle_viewport_fullscreen()
         dpg.set_primary_window("Monochrom", True)
 
-        timer = Timer(1, change_view, (None, None, "device_page"))
+        timer = Timer(7, change_view, (None, None, "device_page"))
         timer.start()
 
 
@@ -560,8 +560,12 @@ class MonochromUI():
         _to = float(dpg.get_value("to_input"))
         _delay_input = float(dpg.get_value("delay_input"))
         _increment_input = int(dpg.get_value("increment_input"))
-        _cycle_input = int(dpg.get_value("cycles_input"))
+
         is_continuous = dpg.get_value("radio_input") == "Continuous"
+        if is_continuous:
+            _cycle_input = int(dpg.get_value("cycles_input"))
+        else:
+            _cycle_input = 0
 
         self.running_flag.value = True
 
