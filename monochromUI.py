@@ -102,7 +102,7 @@ class PopupFactory:
                 dpg.add_theme_style(dpg.mvStyleVar_FrameBorderSize, 1, category=dpg.mvThemeCat_Core)
                 dpg.add_theme_style(dpg.mvStyleVar_FrameRounding, 8, category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_Border, (0, 88, 182), category=dpg.mvThemeCat_Core)
-                dpg.add_theme_color(dpg.mvThemeCol_Text, (0, 88, 182), category=dpg.mvThemeCat_Core)
+                dpg.add_theme_color(dpg.mvThemeCol_Text, (0, 0, 0), category=dpg.mvThemeCat_Core)
         dpg.bind_item_theme(item=self.item_id, theme=window_theme)
 
 class MonochromUI():
@@ -114,6 +114,7 @@ class MonochromUI():
         self.current_nm = mp.Value(c_double, 0.0)
         self.device_steps_per_nm = 0
         self.command_queue = mp.Queue()
+        self.running_processes = []
         self.free_motor()
         with open("config.yaml", "r") as stream:
             try:
@@ -136,6 +137,7 @@ class MonochromUI():
             font_bold_40 = dpg.add_font("fonts/SourceSansPro-Bold.ttf", 22)
             font_regular_30 = dpg.add_font("fonts/SourceSansPro-Regular.ttf", 19)
             font_regular_32 = dpg.add_font("fonts/SourceSansPro-Regular.ttf", 21)
+            font_regular_40 = dpg.add_font("fonts/SourceSansPro-Regular.ttf", 26)
             font_regular_48 = dpg.add_font("fonts/SourceSansPro-Regular.ttf", 30)
             font_regular_100 = dpg.add_font("fonts/SourceSansPro-Regular.ttf", 70)
 
@@ -196,6 +198,14 @@ class MonochromUI():
                 dpg.add_theme_color(dpg.mvThemeCol_ButtonHovered, (232, 237, 242), category=dpg.mvThemeCat_Core)
                 dpg.add_theme_style(dpg.mvStyleVar_FrameBorderSize, 0, category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_Text, (130, 135, 145), category=dpg.mvThemeCat_Core)
+
+        with dpg.theme() as yes_button_theme:
+            with dpg.theme_component(dpg.mvAll, enabled_state=True):
+                dpg.add_theme_color(dpg.mvThemeCol_ButtonHovered, (0, 88, 182), category=dpg.mvThemeCat_Core)
+                dpg.add_theme_style(dpg.mvStyleVar_FrameBorderSize, 0, category=dpg.mvThemeCat_Core)
+                dpg.add_theme_color(dpg.mvThemeCol_Button, (0, 88, 182), category=dpg.mvThemeCat_Core)
+                dpg.add_theme_color(dpg.mvThemeCol_Text, (255, 255, 255), category=dpg.mvThemeCat_Core)
+
 
         with dpg.theme() as stop_button_theme:
             with dpg.theme_component(dpg.mvAll, enabled_state=True):
@@ -266,21 +276,23 @@ class MonochromUI():
         def create_msg_popup():
             if dpg.does_item_exist("test_popup"):
                 dpg.delete_item("test_popup")
-            popup = PopupFactory("test_popup", 400, 200, "Test Message", False, True)
+            popup = PopupFactory("test_popup", 471, 234, "Test Message", False, True)
             popup.create_popup()
             with dpg.group(parent="test_popup"):
-                dpg.add_spacer(height=8)
-                dpg.add_text(default_value="Are you sure you want to shutdown?", indent=7)
-                dpg.bind_item_font(dpg.last_item(), font_regular_48)
-                dpg.add_spacer(height=25)
-                with dpg.group(horizontal=True):
+                dpg.add_text(default_value="Shutdown", pos=[45, 45])
+                dpg.bind_item_font(dpg.last_item(), font_bold_48)
+                dpg.add_text(default_value="Are you sure you want to shutdown the device?", pos=[48, 89])
+                dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                    dpg.add_button(label="Cancel", width=95, height=50, indent=40, user_data=("test_popup", True),
-                                   callback=lambda sender, app_data, user_data: dpg.delete_item("test_popup"))
-                    dpg.bind_item_font(dpg.last_item(), font_regular_32)
-                    dpg.add_button(label="Yes", width=95, height=50, indent=220,
-                                   callback=lambda: subprocess.Popen(['shutdown','-h','now']))
-                    dpg.bind_item_font(dpg.last_item(), font_regular_32)
+                dpg.add_button(label="No", width=180, height=60, user_data=("test_popup", True), pos=[45, 129],
+                               callback=lambda sender, app_data, user_data: dpg.delete_item("test_popup"))
+                dpg.bind_item_font(dpg.last_item(), font_regular_32)
+                dpg.bind_item_theme(dpg.last_item(), input_button_theme)
+                dpg.add_button(label="Yes", width=180, height=60, pos=[245, 129],
+                               callback=lambda: subprocess.Popen(['shutdown', '-h', 'now']))
+                dpg.bind_item_font(dpg.last_item(), font_regular_32)
+                dpg.bind_item_theme(dpg.last_item(), yes_button_theme)
+
 
         with dpg.window(tag="Monochrom", width=960, height=600) as window:
 
@@ -297,8 +309,8 @@ class MonochromUI():
                     dpg.draw_line((0, 52), (1920, 52), color=(201, 217, 235), thickness=3)
 
             with dpg.child_window(autosize_x=True, autosize_y=True, show=True, tag="home_page", border=False):
-                dpg.add_image("logo", pos=[300, 200], width=280, height=76)
-                dpg.add_text("Software Version: 1.0.1", pos=[300, 280])
+                dpg.add_image("logo", pos=[310, 180], width=280, height=76)
+                dpg.add_text("Software Version: 1.0.0", pos=[330, 276])
                 dpg.bind_item_font(dpg.last_item(), font_regular_48)
 
             with dpg.child_window(autosize_x=True, autosize_y=True, show=False, tag="device_page", border=False):
@@ -514,7 +526,7 @@ class MonochromUI():
             dpg.toggle_viewport_fullscreen()
         dpg.set_primary_window("Monochrom", True)
 
-        timer = Timer(100, change_view, (None, None, "device_page"))
+        timer = Timer(10, change_view, (None, None, "device_page"))
         timer.start()
 
 
@@ -568,6 +580,7 @@ class MonochromUI():
         self.running_flag.value = True
 
         run_process = mp.Process(target=self.move_to_process, args=(move_to,))
+        self.running_processes.append(run_process)
         run_process.start()
 
     def move_to_process(self, move_to):
@@ -602,6 +615,7 @@ class MonochromUI():
 
         run_process = mp.Process(target=self.run_recipe_process, args=(_from, _to, _delay_input, _increment_input,
                                                                        _cycle_input, is_continuous,))
+        self.running_processes.append(run_process)
         run_process.start()
 
     def run_recipe_process(self, _from, _to, _delay_input, _increment_input, _cycle_input, is_continuous):
@@ -660,11 +674,13 @@ class MonochromUI():
             self.running_flag.value = True
             self.command_queue.put("Start")
             backward_process = mp.Process(target=self.move_process_backward)
+            self.running_processes.append(backward_process)
             backward_process.start()
         elif dpg.is_item_active("right_button") and self.running_flag.value is False:
             self.running_flag.value = True
             self.command_queue.put("Start")
             forward_process = mp.Process(target=self.move_process_forward)
+            self.running_processes.append(forward_process)
             forward_process.start()
 
     def move_process_forward(self):
@@ -696,6 +712,10 @@ class MonochromUI():
             dpg.configure_item("right_button", enabled=False)
             dpg.configure_item("stop_button", enabled=True)
         elif command == "Stop":
+            for i in range(0, len(self.running_processes)):
+                process = self.running_processes.pop()
+                process.terminate()
+                print("Terminating: ", process)
             change_state_recipe(None, None)
             change_state("move_to_input", None, "go_to_button")
             dpg.configure_item("left_button", enabled=True)
