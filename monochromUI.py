@@ -1,3 +1,5 @@
+import math
+
 import dearpygui.dearpygui as dpg
 import multiprocessing as mp
 from threading import Timer
@@ -526,7 +528,7 @@ class MonochromUI():
             dpg.toggle_viewport_fullscreen()
         dpg.set_primary_window("Monochrom", True)
 
-        timer = Timer(10, change_view, (None, None, "device_page"))
+        timer = Timer(1, change_view, (None, None, "device_page"))
         timer.start()
 
 
@@ -538,7 +540,7 @@ class MonochromUI():
         while dpg.is_dearpygui_running():
             if self.command_queue.qsize() > 0:
                self.process_queue()
-            dpg.set_value("current_position_display", "{:06.1F}".format(self.current_nm.value))
+            dpg.set_value("current_position_display", "{:06.1F}".format(round(self.current_nm.value, 1)))
             dpg.render_dearpygui_frame()
 
     def calibrate(self):
@@ -601,14 +603,17 @@ class MonochromUI():
 
         _from = float(dpg.get_value("from_input"))
         _to = float(dpg.get_value("to_input"))
-        _delay_input = float(dpg.get_value("delay_input"))
-        _increment_input = int(dpg.get_value("increment_input"))
+        _delay_input = abs(float(dpg.get_value("delay_input")))
+        _increment_input = abs(float(dpg.get_value("increment_input")))
 
         is_continuous = dpg.get_value("radio_input") == "Continuous"
         if not is_continuous:
-            _cycle_input = int(dpg.get_value("cycles_input"))
+            _cycle_input = math.floor(float(dpg.get_value("cycles_input")))
         else:
             _cycle_input = 0
+
+        if not is_continuous and _cycle_input < 1:
+            return
 
         self.running_flag.value = True
         self.command_queue.put("Start")
@@ -638,9 +643,9 @@ class MonochromUI():
                 self.running_flag.value = False
                 break
 
-            increments = int(total_distance / _increment_input)
+            rounds = abs(int(total_distance / _increment_input))
 
-            for x in range(0, increments):
+            for x in range(0, rounds):
                 if self.running_flag.value is not True:
                     break
                 if total_distance > 0:
@@ -652,14 +657,14 @@ class MonochromUI():
 
             if self.running_flag.value is not True:
                 break
-            remaining = _to - (_from + (increments * _increment_input))
+            remaining = _to - (_from + (rounds * _increment_input))
             if total_distance > 0:
                 motor.move_monochrom_forward_steps(remaining * self.device_steps_per_nm)
                 time.sleep(_delay_input)
             else:
                 motor.move_monochrom_backward_steps(remaining * self.device_steps_per_nm)
                 time.sleep(_delay_input)
-                
+
             if not is_continuous:
                 completed_cycles = completed_cycles + 1
                 if completed_cycles >= _cycle_input:
@@ -717,6 +722,7 @@ class MonochromUI():
                 process = self.running_processes.pop()
                 process.terminate()
                 print("Terminating: ", process)
+                print(self.current_nm.value)
             change_state_recipe(None, None)
             change_state("move_to_input", None, "go_to_button")
             dpg.configure_item("left_button", enabled=True)

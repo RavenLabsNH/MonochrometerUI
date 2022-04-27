@@ -71,6 +71,8 @@ class DRV8825():
             self.digital_write(self.mode_pins, microstep[stepformat])
         
     def TurnStep(self, Dir, steps, stepdelay=0.0000005):
+        if not PI:
+            stepdelay = 0.000000005
         if (Dir == MotorDir[0]):
             print("backward")
             self.digital_write(self.enable_pin, 1)
@@ -101,7 +103,7 @@ class DRV8825():
                     print("High triggerd " + MotorDir[1] + " " + str(GPIO.input(HIGH_PIN)))
                     break
             self.digital_write(self.step_pin, True)
-            time.sleep(stepdelay)
+            #time.sleep(stepdelay)
             self.digital_write(self.step_pin, False)
             if (Dir == MotorDir[0]):
                 self.current_position.value = self.current_position.value - (1 / self.steps_per_nm)
