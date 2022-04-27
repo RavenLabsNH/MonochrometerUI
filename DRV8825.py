@@ -103,7 +103,7 @@ class DRV8825():
                     print("High triggerd " + MotorDir[1] + " " + str(GPIO.input(HIGH_PIN)))
                     break
             self.digital_write(self.step_pin, True)
-            #time.sleep(stepdelay)
+            time.sleep(stepdelay)
             self.digital_write(self.step_pin, False)
             if (Dir == MotorDir[0]):
                 self.current_position.value = self.current_position.value - (1 / self.steps_per_nm)
