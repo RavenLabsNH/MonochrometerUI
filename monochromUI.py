@@ -645,7 +645,7 @@ class MonochromUI():
 
             rounds = abs(int(total_distance / _increment_input))
 
-            print("Rounds: " + rounds)
+            print("Rounds: " + str(rounds))
 
             for x in range(0, rounds):
                 if self.running_flag.value is not True:
@@ -660,7 +660,7 @@ class MonochromUI():
             if self.running_flag.value is not True:
                 break
             remaining = _to - (_from + (rounds * _increment_input))
-            print("remaining: " + remaining)
+            print("remaining: " + str(remaining))
 
             if total_distance > 0:
                 motor.move_monochrom_forward_steps(remaining * self.device_steps_per_nm)
