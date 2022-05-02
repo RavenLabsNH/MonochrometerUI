@@ -720,7 +720,7 @@ class MonochromUI():
         elif command == "Stop":
             for i in range(0, len(self.running_processes)):
                 process = self.running_processes.pop()
-                if process is not None:
+                if process is not None and process.pid is not None:
                     print("Terminating: ", process)
                     process.terminate()
 
