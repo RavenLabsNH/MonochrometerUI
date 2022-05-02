@@ -258,12 +258,12 @@ class MonochromUI():
                 dpg.add_theme_color(dpg.mvThemeCol_Border, (0, 88, 182), category=dpg.mvThemeCat_Core)
 
         def change_state_create(sender, app_data, user_data):
-
             if is_valid_data("model_input"):
                 state = dpg.get_item_configuration("resolution_input")
                 if state['show'] is True:
                     if is_valid_data("resolution_input"):
                         dpg.configure_item("save_model_button", enabled=True)
+
                     else:
                         dpg.configure_item("save_model_button", enabled=False)
                 else:
@@ -275,7 +275,7 @@ class MonochromUI():
                 dpg.configure_item("save_model_button", enabled=False)
                 dpg.bind_item_theme("model_input", bad_input_theme)
             else:
-                dpg.configure_item("save_model_button", enabled=True)
+                #dpg.configure_item("save_model_button", enabled=True)
                 dpg.bind_item_theme("model_input", input_theme)
 
         def create_msg_popup():
@@ -526,7 +526,6 @@ class MonochromUI():
         dpg.configure_app(wait_for_input=False)
 
         #dpg.show_metrics()
-        dpg.show_style_editor()
         dpg.show_viewport()
         if PI:
             dpg.toggle_viewport_fullscreen()
