@@ -645,7 +645,7 @@ class MonochromUI():
 
             rounds = abs(int(total_distance / _increment_input))
 
-            print("Rounds: " + str(rounds))
+            print("rounds: " + str(rounds))
 
             for x in range(0, rounds):
                 if self.running_flag.value is not True:
@@ -659,13 +659,15 @@ class MonochromUI():
 
             if self.running_flag.value is not True:
                 break
-            remaining = _to - (_from + (rounds * _increment_input))
-            print("remaining: " + str(remaining))
 
             if total_distance > 0:
+                remaining = _to - (_from + (rounds * _increment_input))
+                print("remaining: " + str(remaining))
                 motor.move_monochrom_forward_steps(remaining * self.device_steps_per_nm)
                 time.sleep(_delay_input)
             else:
+                remaining = _to - (_from - (rounds * _increment_input))
+                print("remaining: " + str(remaining))
                 motor.move_monochrom_backward_steps(remaining * self.device_steps_per_nm)
                 time.sleep(_delay_input)
 
@@ -722,7 +724,13 @@ class MonochromUI():
             dpg.configure_item("right_button", enabled=False)
             dpg.configure_item("stop_button", enabled=True)
         elif command == "Stop":
-            12323
+            for i in range(0, len(self.running_processes)):
+                process = self.running_processes.pop()
+                if process is not None and process.pid is not None:
+                    print("Terminating: ", process)
+                    process.terminate()
+
+                print(self.current_nm.value)
             change_state_recipe(None, None)
             change_state("move_to_input", None, "go_to_button")
             dpg.configure_item("left_button", enabled=True)
