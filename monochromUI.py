@@ -553,7 +553,7 @@ class MonochromUI():
         name = dpg.get_value("model_input")
         combo_input = dpg.get_value("combo_input")
         if combo_input == "Custom":
-            calibration = int(dpg.get_value("input_calibration"))
+            calibration = int(dpg.get_value("resolution_input"))
         else:
             calibration = int(re.search(r'\d+', combo_input).group())
 

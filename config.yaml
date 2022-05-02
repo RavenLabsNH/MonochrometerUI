@@ -3,3 +3,5 @@ profiles:
   name: Model A
 - calibration: 50
   name: Model B
+- calibration: 100
+  name: Model C
