@@ -14,6 +14,9 @@ import subprocess
 ONE_REV = 12800
 
 def change_view(sender, app_data, user_data):
+    dpg.set_value("current_position_input", "")
+    dpg.set_value("model_input", "")
+    dpg.set_value("current_position_input", "")
     dpg.configure_item("home_page", show=False)
     dpg.configure_item("device_page", show=False)
     dpg.configure_item("create_page", show=False)
@@ -176,6 +179,7 @@ class MonochromUI():
             with dpg.theme_component(dpg.mvAll, enabled_state=True):
                 dpg.add_theme_style(dpg.mvStyleVar_FramePadding, 7, 15, category=dpg.mvThemeCat_Core)
                 dpg.add_theme_style(dpg.mvStyleVar_ItemSpacing, 0, 10, category=dpg.mvThemeCat_Core)
+                dpg.add_theme_color(dpg.mvThemeCol_Header, (0, 88, 182), category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_Button, (255, 255, 255), category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_ScrollbarBg, (255, 255, 255), category=dpg.mvThemeCat_Core)
             with dpg.theme_component(dpg.mvAll, enabled_state=False):
@@ -207,7 +211,6 @@ class MonochromUI():
                 dpg.add_theme_style(dpg.mvStyleVar_FrameBorderSize, 0, category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_Button, (0, 88, 182), category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_Text, (255, 255, 255), category=dpg.mvThemeCat_Core)
-
 
         with dpg.theme() as stop_button_theme:
             with dpg.theme_component(dpg.mvAll, enabled_state=True):
@@ -523,6 +526,7 @@ class MonochromUI():
         dpg.configure_app(wait_for_input=False)
 
         #dpg.show_metrics()
+        dpg.show_style_editor()
         dpg.show_viewport()
         if PI:
             dpg.toggle_viewport_fullscreen()
