@@ -664,17 +664,17 @@ class MonochromUI():
                 remaining = abs(_to - (_from + (rounds * _increment_input)))
                 print("remaining: " + str(remaining))
                 motor.move_monochrom_forward_steps(remaining * self.device_steps_per_nm)
-                time.sleep(_delay_input)
             else:
                 remaining = abs(_to - (_from - (rounds * _increment_input)))
                 print("remaining: " + str(remaining))
                 motor.move_monochrom_backward_steps(remaining * self.device_steps_per_nm)
-                time.sleep(_delay_input)
 
             if not is_continuous:
                 completed_cycles = completed_cycles + 1
                 if completed_cycles >= _cycle_input:
                     self.running_flag.value = False
+                time.sleep(_delay_input)
+
         self.command_queue.put("Stop")
         self.running_flag.value = False
 
