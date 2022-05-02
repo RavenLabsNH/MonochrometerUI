@@ -609,6 +609,14 @@ class MonochromUI():
         _delay_input = abs(float(dpg.get_value("delay_input")))
         _increment_input = abs(float(dpg.get_value("increment_input")))
 
+        if _from < 0:
+            _from = 0
+            dpg.set_value("from_input", "0")
+        if _to < 0:
+            _to = 0
+            dpg.set_value("to_input", "0")
+
+
         is_continuous = dpg.get_value("radio_input") == "Continuous"
         if not is_continuous:
             _cycle_input = abs(math.floor(float(dpg.get_value("cycles_input"))))
@@ -646,9 +654,9 @@ class MonochromUI():
                 self.running_flag.value = False
                 break
 
-            rounds = abs(math.floor(total_distance / _increment_input))
+            rounds = math.floor(abs(total_distance / _increment_input))
 
-            print("rounds: " + str(rounds))
+            print("rounds: " + str(rounds) + "total_distance: " + str(total_distance) + " _increment_input: " + str(_increment_input))
 
             for x in range(0, rounds):
                 if self.running_flag.value is not True:
@@ -662,6 +670,8 @@ class MonochromUI():
 
             if self.running_flag.value is not True:
                 break
+
+            print(self.current_nm.value)
 
             if total_distance > 0:
                 remaining = abs(_to - (_from + (rounds * _increment_input)))

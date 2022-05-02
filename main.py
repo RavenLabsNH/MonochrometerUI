@@ -1,5 +1,3 @@
-import dearpygui.dearpygui as dpg
-#from Motor import Motor
 from monochromUI import MonochromUI
 
 
