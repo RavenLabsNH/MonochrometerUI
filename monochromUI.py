@@ -608,7 +608,7 @@ class MonochromUI():
 
         is_continuous = dpg.get_value("radio_input") == "Continuous"
         if not is_continuous:
-            _cycle_input = math.floor(float(dpg.get_value("cycles_input")))
+            _cycle_input = abs(math.floor(float(dpg.get_value("cycles_input"))))
         else:
             _cycle_input = 0
 
@@ -643,7 +643,7 @@ class MonochromUI():
                 self.running_flag.value = False
                 break
 
-            rounds = abs(int(total_distance / _increment_input))
+            rounds = abs(math.floor(total_distance / _increment_input))
 
             print("rounds: " + str(rounds))
 
