@@ -721,8 +721,9 @@ class MonochromUI():
             for i in range(0, len(self.running_processes)):
                 process = self.running_processes.pop()
                 if process is not None:
+                    print("Terminating: ", process)
                     process.terminate()
-                print("Terminating: ", process)
+
                 print(self.current_nm.value)
             change_state_recipe(None, None)
             change_state("move_to_input", None, "go_to_button")
