@@ -184,6 +184,7 @@ class MonochromUI():
             with dpg.theme_component(dpg.mvAll, enabled_state=True):
                 dpg.add_theme_style(dpg.mvStyleVar_FramePadding, 7, 15, category=dpg.mvThemeCat_Core)
                 dpg.add_theme_style(dpg.mvStyleVar_ItemSpacing, 0, 10, category=dpg.mvThemeCat_Core)
+                dpg.add_theme_style(dpg.mvStyleVar_ScrollbarSize, 20, category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_Header, (0, 88, 182), category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_Button, (255, 255, 255), category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_ScrollbarBg, (255, 255, 255), category=dpg.mvThemeCat_Core)
@@ -339,7 +340,7 @@ class MonochromUI():
                 dpg.add_text("Model Number", pos=[20, 73])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                dpg.add_combo(self.profile_names, default_value="Model A", pos=[20, 97], width=425, tag="model_combo")
+                dpg.add_combo(self.profile_names, default_value="SMC1-06G", pos=[20, 97], width=425, tag="model_combo")
                 dpg.bind_item_font(dpg.last_item(), font_regular_48)
                 dpg.bind_item_theme(dpg.last_item(), input_theme)
 
@@ -557,7 +558,7 @@ class MonochromUI():
             dpg.toggle_viewport_fullscreen()
         dpg.set_primary_window("Monochrom", True)
 
-        timer = Timer(1, change_view, (None, None, "device_page"))
+        timer = Timer(10, change_view, (None, None, "device_page"))
         timer.start()
 
 
@@ -710,8 +711,6 @@ class MonochromUI():
 
             if remaining != 0:
                 time.sleep(_delay_input)
-
-
 
             if not is_continuous:
                 completed_cycles = completed_cycles + 1
