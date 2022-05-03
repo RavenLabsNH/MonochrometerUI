@@ -559,7 +559,7 @@ class MonochromUI():
             dpg.toggle_viewport_fullscreen()
         dpg.set_primary_window("Monochrom", True)
 
-        timer = Timer(10, change_view, (None, None, "device_page"))
+        timer = Timer(15, change_view, (None, None, "device_page"))
         timer.start()
 
 
@@ -777,6 +777,7 @@ class MonochromUI():
             dpg.configure_item("increment_input", enabled=False)
             dpg.configure_item("radio_input", enabled=False)
             dpg.configure_item("cycles_input", enabled=False)
+            dpg.configure_item("move_to_input", enabled=False)
             dpg.configure_item("back_button", enabled=False)
             dpg.configure_item("stop_button", enabled=True)
         elif command == "Stop":
@@ -795,6 +796,7 @@ class MonochromUI():
             dpg.configure_item("radio_input", enabled=True)
             dpg.configure_item("cycles_input", enabled=True)
             dpg.configure_item("left_button", enabled=True)
+            dpg.configure_item("move_to_input", enabled=True)
             dpg.configure_item("right_button", enabled=True)
             dpg.configure_item("back_button", enabled=True)
             dpg.configure_item("stop_button", enabled=False)
