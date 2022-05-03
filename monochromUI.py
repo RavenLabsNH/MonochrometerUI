@@ -361,6 +361,10 @@ class MonochromUI():
                 dpg.bind_item_font(dpg.last_item(), font_bold_40)
                 dpg.bind_item_theme(dpg.last_item(), input_button_theme)
 
+                dpg.add_button(label="User Manual", width=120, height=25, pos=[820, 488])
+                dpg.bind_item_font(dpg.last_item(), font_bold_40)
+                dpg.bind_item_theme(dpg.last_item(), transparent_button_theme)
+
             with dpg.child_window(autosize_x=True, autosize_y=True, show=False, tag="create_page", border=False):
                 dpg.add_text("Create a New Model", pos=[20, 20])
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
@@ -400,6 +404,10 @@ class MonochromUI():
 
                 dpg.add_button(label="Back to Device Page", width=177, height=23, pos=[28, 488],
                                callback=change_view, user_data="device_page")
+                dpg.bind_item_font(dpg.last_item(), font_bold_40)
+                dpg.bind_item_theme(dpg.last_item(), transparent_button_theme)
+
+                dpg.add_button(label="User Manual", width=120, height=25, pos=[820, 488])
                 dpg.bind_item_font(dpg.last_item(), font_bold_40)
                 dpg.bind_item_theme(dpg.last_item(), transparent_button_theme)
 
@@ -517,6 +525,10 @@ class MonochromUI():
                                tag="stop_button", callback=self.stop_monochrom)
                 dpg.bind_item_font(dpg.last_item(), font_bold_40)
                 dpg.bind_item_theme(dpg.last_item(), stop_button_theme)
+
+                dpg.add_button(label="User Manual", width=120, height=25, pos=[820, 488])
+                dpg.bind_item_font(dpg.last_item(), font_bold_40)
+                dpg.bind_item_theme(dpg.last_item(), transparent_button_theme)
 
                 with dpg.drawlist(width=960, height=547):
                     dpg.draw_line((480, 0), (480, 447), color=(201, 217, 235), thickness=3)
