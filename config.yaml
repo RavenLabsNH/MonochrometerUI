@@ -13,8 +13,8 @@ profiles:
   name: SMC1-02
 - calibration: 50
   name: SMC1-03
-- calibration: 75
-  name: SMC1-04
+- calibration: 50
+  name: SDMC1-03
 - calibration: 50
   name: DMC1-01
 - calibration: 50
