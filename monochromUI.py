@@ -311,7 +311,7 @@ class MonochromUI():
                 dpg.add_image("logo", pos=[8, 8], width=140, height=38)
                 dpg.add_text("Monochromator Control Software", pos=[180, 10])
                 dpg.bind_item_font(dpg.last_item(), font_regular_48)
-                dpg.add_button(label="Power Off", width=85, height=22, pos=[848, 17],
+                dpg.add_button(label="Power Off", width=85, height=22, pos=[848, 16],
                                callback=create_msg_popup)
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
                 dpg.bind_item_theme(dpg.last_item(), power_off_button_theme)
