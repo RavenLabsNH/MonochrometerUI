@@ -701,11 +701,13 @@ class MonochromUI():
             print(self.current_nm.value)
 
             if total_distance > 0:
-                remaining = abs(_to - (_from + (rounds * _increment_input)))
+                remaining = abs(self.current_nm.value - _to)
+                #remaining = abs(_to - (_from + (rounds * _increment_input)))
                 print("remaining: " + str(remaining))
                 motor.move_monochrom_forward_steps(remaining * self.device_steps_per_nm)
             else:
-                remaining = abs(_to - (_from - (rounds * _increment_input)))
+                remaining = abs(self.current_nm.value - _to)
+                #remaining = abs(_to - (_from - (rounds * _increment_input)))
                 print("remaining: " + str(remaining))
                 motor.move_monochrom_backward_steps(remaining * self.device_steps_per_nm)
 
