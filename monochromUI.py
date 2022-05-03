@@ -124,6 +124,7 @@ class MonochromUI():
         self.command_queue = mp.Queue()
         self.running_processes = []
         self.free_motor()
+        self.continous_active = False
         with open("config.yaml", "r") as stream:
             try:
                 self.config = yaml.safe_load(stream)
@@ -729,12 +730,14 @@ class MonochromUI():
 
         if dpg.is_item_active("left_button") and self.running_flag.value is False:
             self.running_flag.value = True
+            self.continous_active = True
             self.command_queue.put("Start")
             backward_process = mp.Process(target=self.move_process_backward)
             self.running_processes.append(backward_process)
             backward_process.start()
         elif dpg.is_item_active("right_button") and self.running_flag.value is False:
             self.running_flag.value = True
+            self.continous_active = True
             self.command_queue.put("Start")
             forward_process = mp.Process(target=self.move_process_forward)
             self.running_processes.append(forward_process)
@@ -749,11 +752,12 @@ class MonochromUI():
         motor.move_monochrom_backward_continuous()
 
     def stop_continous_move(self):
-        if dpg.is_item_hovered("left_button") or dpg.is_item_hovered("right_button"):
+        if self.continous_active:
             self.stop_monochrom()
 
     def stop_monochrom(self):
         self.command_queue.put("Stop")
+        self.continous_active = False
         self.running_flag.value = False
 
     def free_motor(self):
