@@ -5,3 +5,5 @@ profiles:
   name: Model B
 - calibration: 100
   name: Model C
+- calibration: 23
+  name: Model V
