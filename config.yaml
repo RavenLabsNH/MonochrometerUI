@@ -1,9 +1,22 @@
 profiles:
 - calibration: 100
-  name: Model A
+  name: SMC1-06G
+- calibration: 75
+  name: SMC1-04
+- calibration: 150
+  name: SDMC1-01
 - calibration: 50
-  name: Model B
-- calibration: 100
-  name: Model C
-- calibration: 23
-  name: Model V
+  name: SMC1-07G
+- calibration: 75
+  name: SMC1-1200/400
+- calibration: 50
+  name: SMC1-02
+- calibration: 50
+  name: SMC1-03
+- calibration: 75
+  name: SMC1-04
+- calibration: 50
+  name: DMC1-01
+- calibration: 50
+  name: DMC1-02
+

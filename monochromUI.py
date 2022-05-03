@@ -230,7 +230,12 @@ class MonochromUI():
                 dpg.add_theme_color(dpg.mvThemeCol_Text, (130, 135, 145), category=dpg.mvThemeCat_Core)
 
         with dpg.theme() as transparent_button_theme:
-            with dpg.theme_component(dpg.mvAll):
+            with dpg.theme_component(dpg.mvAll, enabled_state=True):
+                dpg.add_theme_color(dpg.mvThemeCol_Button, (244, 248, 252), category=dpg.mvThemeCat_Core)
+                dpg.add_theme_color(dpg.mvThemeCol_ButtonHovered, (244, 248, 252), category=dpg.mvThemeCat_Core)
+                dpg.add_theme_style(dpg.mvStyleVar_ButtonTextAlign, 0.5, category=dpg.mvThemeCat_Core)
+                dpg.add_theme_color(dpg.mvThemeCol_Text, (11, 129, 255), category=dpg.mvThemeCat_Core)
+            with dpg.theme_component(dpg.mvAll, enabled_state=False):
                 dpg.add_theme_color(dpg.mvThemeCol_Button, (244, 248, 252), category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_ButtonHovered, (244, 248, 252), category=dpg.mvThemeCat_Core)
                 dpg.add_theme_style(dpg.mvStyleVar_ButtonTextAlign, 0.5, category=dpg.mvThemeCat_Core)
@@ -519,7 +524,7 @@ class MonochromUI():
                 dpg.bind_item_font(dpg.last_item(), font_bold_40)
                 dpg.bind_item_theme(dpg.last_item(), input_button_theme)
 
-                dpg.add_button(label="Back to Calibration Page", width=209, height=25, pos=[28, 488],
+                dpg.add_button(label="Back to Calibration Page", width=209, height=25, pos=[28, 488], tag="back_button",
                                callback=change_view, user_data="device_page")
                 dpg.bind_item_font(dpg.last_item(), font_bold_40)
                 dpg.bind_item_theme(dpg.last_item(), transparent_button_theme)
@@ -767,6 +772,7 @@ class MonochromUI():
             dpg.configure_item("increment_input", enabled=False)
             dpg.configure_item("radio_input", enabled=False)
             dpg.configure_item("cycles_input", enabled=False)
+            dpg.configure_item("back_button", enabled=False)
             dpg.configure_item("stop_button", enabled=True)
         elif command == "Stop":
             for i in range(0, len(self.running_processes)):
@@ -785,6 +791,7 @@ class MonochromUI():
             dpg.configure_item("cycles_input", enabled=True)
             dpg.configure_item("left_button", enabled=True)
             dpg.configure_item("right_button", enabled=True)
+            dpg.configure_item("back_button", enabled=True)
             dpg.configure_item("stop_button", enabled=False)
             change_state_recipe(None, None)
             recipe_callback(None, None)
