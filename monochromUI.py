@@ -135,6 +135,8 @@ class MonochromUI():
         with dpg.handler_registry():
             dpg.add_mouse_down_handler(callback=self.move_monochrom)
             dpg.add_mouse_release_handler(callback=self.stop_continous_move)
+            dpg.add_key_press_handler(key=dpg.mvKey_Escape, callback=self.stop_monochrom)
+
 
         with dpg.font_registry():
             # first argument ids the path to the .ttf or .otf file
@@ -239,7 +241,11 @@ class MonochromUI():
                 dpg.add_theme_color(dpg.mvThemeCol_Text, (11, 129, 255), category=dpg.mvThemeCat_Core)
 
         with dpg.theme() as radio_button_theme:
-            with dpg.theme_component(dpg.mvAll):
+            with dpg.theme_component(dpg.mvAll, enabled_state=True):
+                dpg.add_theme_color(dpg.mvThemeCol_Button, (0, 88, 182), category=dpg.mvThemeCat_Core)
+                dpg.add_theme_style(dpg.mvStyleVar_ItemSpacing, 0, 20, category=dpg.mvThemeCat_Core)
+                dpg.add_theme_style(dpg.mvStyleVar_FrameBorderSize, 1, category=dpg.mvThemeCat_Core)
+            with dpg.theme_component(dpg.mvAll, enabled_state=False):
                 dpg.add_theme_color(dpg.mvThemeCol_Button, (0, 88, 182), category=dpg.mvThemeCat_Core)
                 dpg.add_theme_style(dpg.mvStyleVar_ItemSpacing, 0, 20, category=dpg.mvThemeCat_Core)
                 dpg.add_theme_style(dpg.mvStyleVar_FrameBorderSize, 1, category=dpg.mvThemeCat_Core)
@@ -681,12 +687,13 @@ class MonochromUI():
                 remaining = abs(_to - (_from - (rounds * _increment_input)))
                 print("remaining: " + str(remaining))
                 motor.move_monochrom_backward_steps(remaining * self.device_steps_per_nm)
+            time.sleep(_delay_input)
 
             if not is_continuous:
                 completed_cycles = completed_cycles + 1
                 if completed_cycles >= _cycle_input:
                     self.running_flag.value = False
-                time.sleep(_delay_input)
+
 
         self.command_queue.put("Stop")
         self.running_flag.value = False
@@ -735,6 +742,12 @@ class MonochromUI():
             dpg.configure_item("go_to_button", enabled=False)
             dpg.configure_item("left_button", enabled=False)
             dpg.configure_item("right_button", enabled=False)
+            dpg.configure_item("from_input", enabled=False)
+            dpg.configure_item("to_input", enabled=False)
+            dpg.configure_item("delay_input", enabled=False)
+            dpg.configure_item("increment_input", enabled=False)
+            dpg.configure_item("radio_input", enabled=False)
+            dpg.configure_item("cycles_input", enabled=False)
             dpg.configure_item("stop_button", enabled=True)
         elif command == "Stop":
             for i in range(0, len(self.running_processes)):
@@ -744,8 +757,14 @@ class MonochromUI():
                     process.terminate()
 
                 print(self.current_nm.value)
-            change_state_recipe(None, None)
             change_state("move_to_input", None, "go_to_button")
+            dpg.configure_item("from_input", enabled=True)
+            dpg.configure_item("to_input", enabled=True)
+            dpg.configure_item("delay_input", enabled=True)
+            dpg.configure_item("increment_input", enabled=True)
+            dpg.configure_item("radio_input", enabled=True)
+            dpg.configure_item("cycles_input", enabled=True)
             dpg.configure_item("left_button", enabled=True)
             dpg.configure_item("right_button", enabled=True)
             dpg.configure_item("stop_button", enabled=False)
+            change_state_recipe(None, None)
