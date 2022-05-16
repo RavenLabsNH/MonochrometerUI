@@ -22,15 +22,15 @@ class Motor:
         if disable:
             self.motor1.Stop()
 
-    def move_monochrom_forward_continuous(self, disable=True):
-        print("move_monochrom_forward_continuous")
-        self.motor1.TurnContinous(dir='forward')
+    def move_monochrom_forward_continuous(self, delay, disable=True):
+        print("move_monochrom_forward_continuous. Delay: " + str(delay))
+        self.motor1.TurnContinous(dir='forward', stepdelay=delay)
         if disable:
             self.motor1.Stop()
 
-    def move_monochrom_backward_continuous(self, disable=True):
-        print("move_monochrom_backward_continuous")
-        self.motor1.TurnContinous(dir='backward')
+    def move_monochrom_backward_continuous(self, delay, disable=True):
+        print("move_monochrom_backward_continuous. Delay: " + str(delay))
+        self.motor1.TurnContinous(dir='backward', stepdelay=delay)
         if disable:
             self.motor1.Stop()
 

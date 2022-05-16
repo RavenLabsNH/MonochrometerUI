@@ -140,6 +140,7 @@ class MonochromUI():
             dpg.add_mouse_down_handler(callback=self.move_monochrom)
             dpg.add_mouse_release_handler(callback=self.stop_continous_move)
             dpg.add_key_press_handler(key=dpg.mvKey_Escape, callback=self.stop_monochrom)
+            
 
 
         with dpg.font_registry():
@@ -559,7 +560,7 @@ class MonochromUI():
             dpg.toggle_viewport_fullscreen()
         dpg.set_primary_window("Monochrom", True)
 
-        timer = Timer(20, change_view, (None, None, "device_page"))
+        timer = Timer(1, change_view, (None, None, "device_page"))
         timer.start()
 
 
@@ -728,28 +729,33 @@ class MonochromUI():
         if self.running_flag.value:
             return
 
+
+
+
         if dpg.is_item_active("left_button") and self.running_flag.value is False:
+            delay = float(dpg.get_value("cycles_input"))
             self.running_flag.value = True
             self.continous_active = True
             self.command_queue.put("Start")
-            backward_process = mp.Process(target=self.move_process_backward)
+            backward_process = mp.Process(target=self.move_process_backward, args=(delay,))
             self.running_processes.append(backward_process)
             backward_process.start()
         elif dpg.is_item_active("right_button") and self.running_flag.value is False:
+            delay = float(dpg.get_value("cycles_input"))
             self.running_flag.value = True
             self.continous_active = True
             self.command_queue.put("Start")
-            forward_process = mp.Process(target=self.move_process_forward)
+            forward_process = mp.Process(target=self.move_process_forward, args=(delay,))
             self.running_processes.append(forward_process)
             forward_process.start()
 
-    def move_process_forward(self):
+    def move_process_forward(self, delay):
         motor = Motor(self.running_flag, self.current_nm, self.device_steps_per_nm)
-        motor.move_monochrom_forward_continuous()
+        motor.move_monochrom_forward_continuous(delay)
 
-    def move_process_backward(self):
+    def move_process_backward(self,delay ):
         motor = Motor(self.running_flag, self.current_nm, self.device_steps_per_nm)
-        motor.move_monochrom_backward_continuous()
+        motor.move_monochrom_backward_continuous(delay)
 
     def stop_continous_move(self):
         if self.continous_active:
