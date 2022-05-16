@@ -140,8 +140,7 @@ class MonochromUI():
             dpg.add_mouse_down_handler(callback=self.move_monochrom)
             dpg.add_mouse_release_handler(callback=self.stop_continous_move)
             dpg.add_key_press_handler(key=dpg.mvKey_Escape, callback=self.stop_monochrom)
-            
-
+            dpg.add_key_press_handler(key=dpg.mvKey_Return, callback=self.enter_key_callback)
 
         with dpg.font_registry():
             # first argument ids the path to the .ttf or .otf file
@@ -149,7 +148,6 @@ class MonochromUI():
             font_bold_40 = dpg.add_font("fonts/SourceSansPro-Bold.ttf", 22)
             font_regular_30 = dpg.add_font("fonts/SourceSansPro-Regular.ttf", 19)
             font_regular_32 = dpg.add_font("fonts/SourceSansPro-Regular.ttf", 21)
-            font_regular_40 = dpg.add_font("fonts/SourceSansPro-Regular.ttf", 26)
             font_regular_48 = dpg.add_font("fonts/SourceSansPro-Regular.ttf", 30)
             font_regular_100 = dpg.add_font("fonts/SourceSansPro-Regular.ttf", 70)
 
@@ -563,8 +561,6 @@ class MonochromUI():
         timer = Timer(1, change_view, (None, None, "device_page"))
         timer.start()
 
-
-
     def run(self):
         """
         Run the main DearPyGui render thread
@@ -729,9 +725,6 @@ class MonochromUI():
         if self.running_flag.value:
             return
 
-
-
-
         if dpg.is_item_active("left_button") and self.running_flag.value is False:
             delay = float(dpg.get_value("cycles_input"))
             self.running_flag.value = True
@@ -769,6 +762,27 @@ class MonochromUI():
     def free_motor(self):
         motor = Motor(self.running_flag, self.current_nm, self.device_steps_per_nm)
         motor.stop_motor()
+
+    def enter_key_callback(self):
+        motor_page_state = dpg.get_item_configuration("motor_page")
+        print("1")
+        if motor_page_state['show'] is True:
+            print("2")
+            go_to_button_state = dpg.get_item_configuration("go_to_button")
+            print(go_to_button_state)
+            if dpg.is_item_active("move_to_input"):
+                print("3")
+                go_to_button_state = dpg.get_item_configuration("go_to_button")
+                print(go_to_button_state)
+                if go_to_button_state['enabled'] == True:
+                    print("4")
+                    self.move_to()
+            elif dpg.is_item_active("from_input") or dpg.is_item_active("to_input") or dpg.is_item_active("delay_input") \
+                    or dpg.is_item_active("increment_input") or dpg.is_item_active("cycles_input"):
+                run_recipe_button_state = dpg.get_item_configuration("run_recipe_button")
+                if run_recipe_button_state['enabled'] == True:
+                    self.run_recipe()
+
 
     def process_queue(self):
         command = self.command_queue.get()
