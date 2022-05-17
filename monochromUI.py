@@ -13,6 +13,15 @@ import subprocess
 
 ONE_REV = 12800
 
+'''
+0: None
+1: Go To Input
+2: Run Recipe
+'''
+INPUT_SOURCE = 0
+
+
+
 def change_view(sender, app_data, user_data):
     dpg.set_value("current_position_input", "")
     dpg.set_value("model_input", "")
@@ -30,12 +39,18 @@ def is_valid_data(name):
     return len(dpg.get_value(name)) > 0
 
 def change_state(sender, app_data, user_data):
+    if user_data == "go_to_button":
+        global INPUT_SOURCE
+        INPUT_SOURCE = 1
+
     if is_valid_data(sender):
         dpg.configure_item(user_data, enabled=True)
     else:
         dpg.configure_item(user_data, enabled=False)
 
 def change_state_recipe(sender, app_data):
+    global INPUT_SOURCE
+    INPUT_SOURCE = 2
     if is_valid_data("from_input") and is_valid_data("to_input") and is_valid_data("delay_input")\
             and is_valid_data("increment_input"):
         if dpg.get_value("radio_input") == "Continuous":
@@ -82,6 +97,8 @@ def render_window_center(sender, app_data, user_data):
         login_height = dpg.get_item_height(user_data)
         dpg.set_item_pos(user_data, [int((main_width // 2 - login_width // 2)),
                                      int((main_height / 2 - login_height / 2))])
+
+timer = Timer(20, change_view, (None, None, "device_page"))
 
 class PopupFactory:
     def __init__(self, item_id, width, height, title=None, no_background=False, title_bar=False):
@@ -141,6 +158,7 @@ class MonochromUI():
             dpg.add_mouse_release_handler(callback=self.stop_continous_move)
             dpg.add_key_press_handler(key=dpg.mvKey_Escape, callback=self.stop_monochrom)
             dpg.add_key_press_handler(key=dpg.mvKey_Return, callback=self.enter_key_callback)
+            dpg.add_key_press_handler(key=-1, callback=self.home_page_callback)
 
         with dpg.font_registry():
             # first argument ids the path to the .ttf or .otf file
@@ -188,9 +206,30 @@ class MonochromUI():
                 dpg.add_theme_color(dpg.mvThemeCol_Header, (0, 88, 182), category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_Button, (255, 255, 255), category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_ScrollbarBg, (255, 255, 255), category=dpg.mvThemeCat_Core)
+                dpg.add_theme_color(dpg.mvThemeCol_FrameBg, (255, 255, 255), category=dpg.mvThemeCat_Core)
             with dpg.theme_component(dpg.mvAll, enabled_state=False):
                 dpg.add_theme_style(dpg.mvStyleVar_FramePadding, 7, 15, category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_FrameBg, (237, 237, 242), category=dpg.mvThemeCat_Core)
+
+        with dpg.theme() as input_slider_theme:
+            with dpg.theme_component(dpg.mvAll):
+                dpg.add_theme_color(dpg.mvThemeCol_FrameBg, (255, 255, 255), category=dpg.mvThemeCat_Core)
+                dpg.add_theme_color(dpg.mvThemeCol_FrameBgHovered, (255, 255, 255), category=dpg.mvThemeCat_Core)
+                dpg.add_theme_color(dpg.mvThemeCol_SliderGrab, (0, 88, 182), category=dpg.mvThemeCat_Core)
+                dpg.add_theme_color(dpg.mvThemeCol_FrameBgActive, (255, 255, 255), category=dpg.mvThemeCat_Core)
+                dpg.add_theme_style(dpg.mvStyleVar_FrameBorderSize, 0, category=dpg.mvThemeCat_Core)
+                dpg.add_theme_color(dpg.mvThemeCol_Border, (173, 186, 200), category=dpg.mvThemeCat_Core)
+
+                dpg.add_theme_style(dpg.mvStyleVar_GrabMinSize, 20, category=dpg.mvThemeCat_Core)
+                dpg.add_theme_style(dpg.mvStyleVar_GrabRounding, 7, category=dpg.mvThemeCat_Core)
+
+        with dpg.theme() as input_int_theme:
+            with dpg.theme_component(dpg.mvAll, enabled_state=True):
+                dpg.add_theme_style(dpg.mvStyleVar_FramePadding, 15, 15, category=dpg.mvThemeCat_Core)
+                dpg.add_theme_color(dpg.mvThemeCol_FrameBg, (255, 255, 255), category=dpg.mvThemeCat_Core)
+                dpg.add_theme_color(dpg.mvThemeCol_Border, (173, 186, 200), category=dpg.mvThemeCat_Core)
+
+
 
         with dpg.theme() as bad_input_theme:
             with dpg.theme_component(dpg.mvAll):
@@ -293,25 +332,49 @@ class MonochromUI():
                 #dpg.configure_item("save_model_button", enabled=True)
                 dpg.bind_item_theme("model_input", input_theme)
 
-        def create_msg_popup():
-            if dpg.does_item_exist("test_popup"):
-                dpg.delete_item("test_popup")
-            popup = PopupFactory("test_popup", 471, 234, "Test Message", False, True)
+        def create_shutdown_popup():
+            if dpg.does_item_exist("shutdown_popup"):
+                dpg.delete_item("shutdown_popup")
+            popup = PopupFactory("shutdown_popup", 471, 234, "Test Message", False, True)
             popup.create_popup()
-            with dpg.group(parent="test_popup"):
+            with dpg.group(parent="shutdown_popup"):
                 dpg.add_text(default_value="Shutdown", pos=[45, 45])
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
                 dpg.add_text(default_value="Are you sure you want to shutdown the device?", pos=[48, 89])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
 
-                dpg.add_button(label="No", width=180, height=60, user_data=("test_popup", True), pos=[45, 129],
-                               callback=lambda sender, app_data, user_data: dpg.delete_item("test_popup"))
+                dpg.add_button(label="No", width=180, height=60, user_data=("shutdown_popup", True), pos=[45, 129],
+                               callback=lambda sender, app_data, user_data: dpg.delete_item("shutdown_popup"))
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
                 dpg.bind_item_theme(dpg.last_item(), input_button_theme)
                 dpg.add_button(label="Yes", width=180, height=60, pos=[245, 129],
                                callback=lambda: subprocess.Popen(['shutdown', '-h', 'now']))
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
                 dpg.bind_item_theme(dpg.last_item(), yes_button_theme)
+
+        def create_speed_popup():
+            if dpg.does_item_exist("speed_popup"):
+                dpg.delete_item("speed_popup")
+            popup = PopupFactory("speed_popup", 522, 408, "Test Message", False, True)
+            popup.create_popup()
+            with dpg.group(parent="speed_popup"):
+                dpg.add_text(default_value="Adjust Motor Speed", pos=[48, 45])
+                dpg.bind_item_font(dpg.last_item(), font_bold_48)
+                dpg.add_text(default_value="This will set the motor speed for any further movements.", pos=[48, 81])
+                dpg.bind_item_font(dpg.last_item(), font_regular_32)
+                int_source = dpg.add_input_int(min_value=0.0, max_value=100.0, step=0, pos=[206, 213], width=110)
+                dpg.bind_item_font(dpg.last_item(), font_bold_48)
+                dpg.bind_item_theme(dpg.last_item(), input_int_theme)
+                dpg.add_slider_int(source=int_source, pos=[45, 146], width=432, height=16)
+                dpg.bind_item_font(dpg.last_item(), font_bold_48)
+                dpg.bind_item_theme(dpg.last_item(), input_slider_theme)
+                dpg.add_text(default_value="Move to Position", pos=[206, 189])
+                dpg.bind_item_font(dpg.last_item(), font_regular_32)
+                dpg.add_button(label="Ok", width=247, height=60, pos=[137, 303],
+                               callback=lambda sender, app_data, user_data: dpg.delete_item("speed_popup"))
+                dpg.bind_item_font(dpg.last_item(), font_regular_32)
+                dpg.bind_item_theme(dpg.last_item(), yes_button_theme)
+
 
 
         with dpg.window(tag="Monochrom", width=960, height=600) as window:
@@ -321,7 +384,7 @@ class MonochromUI():
                 dpg.add_text("Monochromator Control Software", pos=[180, 10])
                 dpg.bind_item_font(dpg.last_item(), font_regular_48)
                 dpg.add_button(label="Power Off", width=85, height=22, pos=[848, 16],
-                               callback=create_msg_popup)
+                               callback=create_shutdown_popup)
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
                 dpg.bind_item_theme(dpg.last_item(), power_off_button_theme)
                 with dpg.drawlist(width=960, height=53):
@@ -330,7 +393,7 @@ class MonochromUI():
 
             with dpg.child_window(autosize_x=True, autosize_y=True, show=True, tag="home_page", border=False):
                 dpg.add_image("logo", pos=[310, 180], width=280, height=76)
-                dpg.add_text("Software Version: 1.0.0", pos=[330, 276])
+                dpg.add_text("Software Version: 1.0.1", pos=[330, 276])
                 dpg.bind_item_font(dpg.last_item(), font_regular_48)
 
             with dpg.child_window(autosize_x=True, autosize_y=True, show=False, tag="device_page", border=False):
@@ -535,7 +598,7 @@ class MonochromUI():
                 dpg.bind_item_font(dpg.last_item(), font_bold_40)
                 dpg.bind_item_theme(dpg.last_item(), stop_button_theme)
 
-                dpg.add_button(label="User Manual", width=120, height=25, pos=[820, 488])
+                dpg.add_button(label="Motor Speed", width=120, height=25, pos=[820, 488], callback=create_speed_popup)
                 dpg.bind_item_font(dpg.last_item(), font_bold_40)
                 dpg.bind_item_theme(dpg.last_item(), transparent_button_theme)
 
@@ -558,7 +621,6 @@ class MonochromUI():
             dpg.toggle_viewport_fullscreen()
         dpg.set_primary_window("Monochrom", True)
 
-        timer = Timer(1, change_view, (None, None, "device_page"))
         timer.start()
 
     def run(self):
@@ -763,22 +825,23 @@ class MonochromUI():
         motor = Motor(self.running_flag, self.current_nm, self.device_steps_per_nm)
         motor.stop_motor()
 
+    def home_page_callback(self):
+        home_page_state = dpg.get_item_configuration("home_page")
+        if home_page_state['show'] is True:
+            timer.cancel()
+            change_view(None, None, "device_page")
+
     def enter_key_callback(self):
         motor_page_state = dpg.get_item_configuration("motor_page")
-        print("1")
         if motor_page_state['show'] is True:
-            print("2")
             go_to_button_state = dpg.get_item_configuration("go_to_button")
             print(go_to_button_state)
-            if dpg.is_item_active("move_to_input"):
-                print("3")
+            if INPUT_SOURCE == 1:
                 go_to_button_state = dpg.get_item_configuration("go_to_button")
                 print(go_to_button_state)
                 if go_to_button_state['enabled'] == True:
-                    print("4")
                     self.move_to()
-            elif dpg.is_item_active("from_input") or dpg.is_item_active("to_input") or dpg.is_item_active("delay_input") \
-                    or dpg.is_item_active("increment_input") or dpg.is_item_active("cycles_input"):
+            elif INPUT_SOURCE == 2:
                 run_recipe_button_state = dpg.get_item_configuration("run_recipe_button")
                 if run_recipe_button_state['enabled'] == True:
                     self.run_recipe()
@@ -801,6 +864,8 @@ class MonochromUI():
             dpg.configure_item("back_button", enabled=False)
             dpg.configure_item("stop_button", enabled=True)
         elif command == "Stop":
+            global INPUT_SOURCE
+            temp = INPUT_SOURCE
             for i in range(0, len(self.running_processes)):
                 process = self.running_processes.pop()
                 if process is not None and process.pid is not None:
@@ -822,3 +887,5 @@ class MonochromUI():
             dpg.configure_item("stop_button", enabled=False)
             change_state_recipe(None, None)
             recipe_callback(None, None)
+
+            INPUT_SOURCE = temp

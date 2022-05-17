@@ -1,12 +1,12 @@
 import dearpygui.dearpygui as dpg
+import dearpygui.demo as demo
 
 dpg.create_context()
-dpg.create_viewport(title='Custom Title', width=600, height=300, decorated=False)
+dpg.create_viewport(title='Custom Title', width=600, height=600)
 
-with dpg.window(label="Example Window", width=600, height=300, tag="demo"):
-    dpg.add_button(label="Test" , pos=[100, 20], width=150, height=50)
+demo.show_demo()
 
 dpg.setup_dearpygui()
 dpg.show_viewport()
-dpg.set_primary_window("demo", True)
 dpg.start_dearpygui()
+dpg.destroy_context()
