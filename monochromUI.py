@@ -163,6 +163,7 @@ class MonochromUI():
 
         with dpg.font_registry():
             # first argument ids the path to the .ttf or .otf file
+            font_bold_50 = dpg.add_font("fonts/SourceSansPro-Bold.ttf", 38)
             font_bold_48 = dpg.add_font("fonts/SourceSansPro-Bold.ttf", 35)
             font_bold_40 = dpg.add_font("fonts/SourceSansPro-Bold.ttf", 22)
             font_regular_30 = dpg.add_font("fonts/SourceSansPro-Regular.ttf", 19)
@@ -600,7 +601,7 @@ class MonochromUI():
 
                 dpg.add_button(label="Stop", width=247, height=60, pos=[356, 467], enabled=False,
                                tag="stop_button", callback=self.stop_monochrom)
-                dpg.bind_item_font(dpg.last_item(), font_bold_48)
+                dpg.bind_item_font(dpg.last_item(), font_bold_50)
                 dpg.bind_item_theme(dpg.last_item(), stop_button_theme)
 
                 dpg.add_button(label="Motor Speed", width=120, height=25, pos=[820, 488], callback=create_speed_popup)
