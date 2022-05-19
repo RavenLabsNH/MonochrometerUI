@@ -370,7 +370,8 @@ class MonochromUI():
                                   tag="speed_source", callback=set_speed_callback)
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
                 dpg.bind_item_theme(dpg.last_item(), input_int_theme)
-                dpg.add_slider_int(source="speed_source", pos=[45, 146], width=432, height=16, callback=set_speed_callback)
+                dpg.add_slider_int(source="speed_source", pos=[45, 146], min_value=1, max_value=100,
+                                   width=432, height=16, callback=set_speed_callback)
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
                 dpg.bind_item_theme(dpg.last_item(), input_slider_theme)
                 dpg.set_value(dpg.last_item(), self.speed_factor)
