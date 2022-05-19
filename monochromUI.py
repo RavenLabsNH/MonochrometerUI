@@ -98,7 +98,7 @@ def render_window_center(sender, app_data, user_data):
         dpg.set_item_pos(user_data, [int((main_width // 2 - login_width // 2)),
                                      int((main_height / 2 - login_height / 2))])
 
-timer = Timer(20, change_view, (None, None, "device_page"))
+timer = Timer(25, change_view, (None, None, "device_page"))
 
 class PopupFactory:
     def __init__(self, item_id, width, height, title=None, no_background=False, title_bar=False):
