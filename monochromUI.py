@@ -21,7 +21,6 @@ ONE_REV = 12800
 INPUT_SOURCE = 0
 
 
-
 def change_view(sender, app_data, user_data):
     dpg.set_value("current_position_input", "")
     dpg.set_value("model_input", "")
@@ -65,6 +64,7 @@ def change_state_recipe(sender, app_data):
 
 def calibration_callback(sender, app_data):
     val = dpg.get_value(sender)
+
     if val == "Custom":
         dpg.configure_item("resolution_text", show=True)
         dpg.configure_item("resolution_input", show=True)
@@ -141,7 +141,8 @@ class MonochromUI():
         self.command_queue = mp.Queue()
         self.running_processes = []
         self.free_motor()
-        self.continous_active = False
+        self.speed_factor = 100
+        self.continuous_active = False
         with open("config.yaml", "r") as stream:
             try:
                 self.config = yaml.safe_load(stream)
@@ -219,6 +220,7 @@ class MonochromUI():
                 dpg.add_theme_color(dpg.mvThemeCol_FrameBgActive, (255, 255, 255), category=dpg.mvThemeCat_Core)
                 dpg.add_theme_style(dpg.mvStyleVar_FrameBorderSize, 0, category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_Border, (173, 186, 200), category=dpg.mvThemeCat_Core)
+                dpg.add_theme_color(dpg.mvThemeCol_Text, (173, 186, 200), category=dpg.mvThemeCat_Core)
 
                 dpg.add_theme_style(dpg.mvStyleVar_GrabMinSize, 20, category=dpg.mvThemeCat_Core)
                 dpg.add_theme_style(dpg.mvStyleVar_GrabRounding, 7, category=dpg.mvThemeCat_Core)
@@ -228,8 +230,6 @@ class MonochromUI():
                 dpg.add_theme_style(dpg.mvStyleVar_FramePadding, 15, 15, category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_FrameBg, (255, 255, 255), category=dpg.mvThemeCat_Core)
                 dpg.add_theme_color(dpg.mvThemeCol_Border, (173, 186, 200), category=dpg.mvThemeCat_Core)
-
-
 
         with dpg.theme() as bad_input_theme:
             with dpg.theme_component(dpg.mvAll):
@@ -332,6 +332,10 @@ class MonochromUI():
                 #dpg.configure_item("save_model_button", enabled=True)
                 dpg.bind_item_theme("model_input", input_theme)
 
+        def set_speed_callback(sender, app_data):
+            if dpg.get_value(sender) > 0:
+                self.speed_factor = dpg.get_value(sender)
+
         def create_shutdown_popup():
             if dpg.does_item_exist("shutdown_popup"):
                 dpg.delete_item("shutdown_popup")
@@ -362,20 +366,20 @@ class MonochromUI():
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
                 dpg.add_text(default_value="This will set the motor speed for any further movements.", pos=[48, 81])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
-                int_source = dpg.add_input_int(min_value=0.0, max_value=100.0, step=0, pos=[206, 213], width=110)
+                dpg.add_input_int(min_value=1, max_value=100, step=0, pos=[206, 213], width=110,\
+                                  tag="speed_source", callback=set_speed_callback)
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
                 dpg.bind_item_theme(dpg.last_item(), input_int_theme)
-                dpg.add_slider_int(source=int_source, pos=[45, 146], width=432, height=16)
+                dpg.add_slider_int(source="speed_source", pos=[45, 146], width=432, height=16, callback=set_speed_callback)
                 dpg.bind_item_font(dpg.last_item(), font_bold_48)
                 dpg.bind_item_theme(dpg.last_item(), input_slider_theme)
+                dpg.set_value(dpg.last_item(), self.speed_factor)
                 dpg.add_text(default_value="Move to Position", pos=[206, 189])
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
                 dpg.add_button(label="Ok", width=247, height=60, pos=[137, 303],
                                callback=lambda sender, app_data, user_data: dpg.delete_item("speed_popup"))
                 dpg.bind_item_font(dpg.last_item(), font_regular_32)
                 dpg.bind_item_theme(dpg.last_item(), yes_button_theme)
-
-
 
         with dpg.window(tag="Monochrom", width=960, height=600) as window:
 
@@ -595,7 +599,7 @@ class MonochromUI():
 
                 dpg.add_button(label="Stop", width=247, height=60, pos=[356, 467], enabled=False,
                                tag="stop_button", callback=self.stop_monochrom)
-                dpg.bind_item_font(dpg.last_item(), font_bold_40)
+                dpg.bind_item_font(dpg.last_item(), font_bold_48)
                 dpg.bind_item_theme(dpg.last_item(), stop_button_theme)
 
                 dpg.add_button(label="Motor Speed", width=120, height=25, pos=[820, 488], callback=create_speed_popup)
@@ -662,8 +666,14 @@ class MonochromUI():
         dpg.configure_item("model_combo", items=self.profile_names)
         change_view(None, None, "device_page")
 
+    def calculate_speed_delay(self):
+        delay = (-0.0000505 * self.speed_factor) + .0050505
+        print("speed factor: " + str(self.speed_factor) + " delay: " + str(delay))
+        return delay
+
     def move_to(self):
         move_to = float(dpg.get_value("move_to_input"))
+        speed_delay = self.calculate_speed_delay()
 
         if self.running_flag.value:
             return
@@ -671,13 +681,13 @@ class MonochromUI():
         self.command_queue.put("Start")
         self.running_flag.value = True
 
-        run_process = mp.Process(target=self.move_to_process, args=(move_to,))
+        run_process = mp.Process(target=self.move_to_process, args=(move_to, speed_delay,))
         self.running_processes.append(run_process)
         run_process.start()
 
-    def move_to_process(self, move_to):
+    def move_to_process(self, move_to, speed_delay):
         distance = self.current_nm.value - move_to
-        motor = Motor(self.running_flag, self.current_nm, self.device_steps_per_nm)
+        motor = Motor(self.running_flag, self.current_nm, self.device_steps_per_nm, speed_delay)
 
         if distance > 0:
             motor.move_monochrom_backward_steps(abs(distance) * self.device_steps_per_nm)
@@ -695,6 +705,7 @@ class MonochromUI():
         _to = float(dpg.get_value("to_input"))
         _delay_input = abs(float(dpg.get_value("delay_input")))
         _increment_input = abs(float(dpg.get_value("increment_input")))
+        _speed_delay = self.calculate_speed_delay()
 
         if _from < 0:
             _from = 0
@@ -717,13 +728,13 @@ class MonochromUI():
         self.command_queue.put("Start")
 
         run_process = mp.Process(target=self.run_recipe_process, args=(_from, _to, _delay_input, _increment_input,
-                                                                       _cycle_input, is_continuous,))
+                                                                       _cycle_input, is_continuous, _speed_delay, ))
         self.running_processes.append(run_process)
         run_process.start()
 
-    def run_recipe_process(self, _from, _to, _delay_input, _increment_input, _cycle_input, is_continuous):
+    def run_recipe_process(self, _from, _to, _delay_input, _increment_input, _cycle_input, is_continuous, speed_delay):
         completed_cycles = 0
-        motor = Motor(self.running_flag, self.current_nm, self.device_steps_per_nm)
+        motor = Motor(self.running_flag, self.current_nm, self.device_steps_per_nm, speed_delay)
 
         while self.running_flag.value:
             travel_to_start_distance = self.current_nm.value - _from
@@ -788,41 +799,41 @@ class MonochromUI():
             return
 
         if dpg.is_item_active("left_button") and self.running_flag.value is False:
-            delay = float(dpg.get_value("cycles_input"))
+            delay = self.calculate_speed_delay()
             self.running_flag.value = True
-            self.continous_active = True
+            self.continuous_active = True
             self.command_queue.put("Start")
             backward_process = mp.Process(target=self.move_process_backward, args=(delay,))
             self.running_processes.append(backward_process)
             backward_process.start()
         elif dpg.is_item_active("right_button") and self.running_flag.value is False:
-            delay = float(dpg.get_value("cycles_input"))
+            delay = self.calculate_speed_delay()
             self.running_flag.value = True
-            self.continous_active = True
+            self.continuous_active = True
             self.command_queue.put("Start")
             forward_process = mp.Process(target=self.move_process_forward, args=(delay,))
             self.running_processes.append(forward_process)
             forward_process.start()
 
     def move_process_forward(self, delay):
-        motor = Motor(self.running_flag, self.current_nm, self.device_steps_per_nm)
-        motor.move_monochrom_forward_continuous(delay)
+        motor = Motor(self.running_flag, self.current_nm, self.device_steps_per_nm, delay)
+        motor.move_monochrom_forward_continuous()
 
-    def move_process_backward(self,delay ):
-        motor = Motor(self.running_flag, self.current_nm, self.device_steps_per_nm)
-        motor.move_monochrom_backward_continuous(delay)
+    def move_process_backward(self, delay):
+        motor = Motor(self.running_flag, self.current_nm, self.device_steps_per_nm, delay)
+        motor.move_monochrom_backward_continuous()
 
     def stop_continous_move(self):
-        if self.continous_active:
+        if self.continuous_active:
             self.stop_monochrom()
 
     def stop_monochrom(self):
         self.command_queue.put("Stop")
-        self.continous_active = False
+        self.continuous_active = False
         self.running_flag.value = False
 
     def free_motor(self):
-        motor = Motor(self.running_flag, self.current_nm, self.device_steps_per_nm)
+        motor = Motor(self.running_flag, self.current_nm, self.device_steps_per_nm, 0)
         motor.stop_motor()
 
     def home_page_callback(self):
@@ -833,19 +844,20 @@ class MonochromUI():
 
     def enter_key_callback(self):
         motor_page_state = dpg.get_item_configuration("motor_page")
+        device_page_state = dpg.get_item_configuration("device_page")
         if motor_page_state['show'] is True:
-            go_to_button_state = dpg.get_item_configuration("go_to_button")
-            print(go_to_button_state)
             if INPUT_SOURCE == 1:
                 go_to_button_state = dpg.get_item_configuration("go_to_button")
-                print(go_to_button_state)
                 if go_to_button_state['enabled'] == True:
                     self.move_to()
             elif INPUT_SOURCE == 2:
                 run_recipe_button_state = dpg.get_item_configuration("run_recipe_button")
                 if run_recipe_button_state['enabled'] == True:
                     self.run_recipe()
-
+        if device_page_state['show'] is True:
+            calibrate_button_state = dpg.get_item_configuration("calibrate_button")
+            if calibrate_button_state['enabled'] == True:
+                self.calibrate()
 
     def process_queue(self):
         command = self.command_queue.get()

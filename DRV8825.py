@@ -65,20 +65,14 @@ class DRV8825():
                      '1/16step': (0, 0, 1),
                      '1/32step': (1, 0, 1)}
 
-        print("Control mode:" + mode)
         if (mode == ControlMode[1]):
-            print("set pins")
             self.digital_write(self.mode_pins, microstep[stepformat])
         
     def TurnStep(self, Dir, steps, stepdelay=0.0000005):
-        if not PI:
-            stepdelay = 0.000000005
         if (Dir == MotorDir[0]):
-            print("backward")
             self.digital_write(self.enable_pin, 1)
             self.digital_write(self.dir_pin, 0)
         elif (Dir == MotorDir[1]):
-            print("forward")
             self.digital_write(self.enable_pin, 1)
             self.digital_write(self.dir_pin, 1)
         else:
@@ -113,11 +107,9 @@ class DRV8825():
 
     def TurnContinous(self, dir, stepdelay=0.0000005):
         if (dir == MotorDir[0]):
-            print("backward")
             self.digital_write(self.enable_pin, 1)
             self.digital_write(self.dir_pin, 0)
         elif (dir == MotorDir[1]):
-            print("forward")
             self.digital_write(self.enable_pin, 1)
             self.digital_write(self.dir_pin, 1)
         else:
