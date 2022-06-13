@@ -399,7 +399,7 @@ class MonochromUI():
 
             with dpg.child_window(autosize_x=True, autosize_y=True, show=True, tag="home_page", border=False):
                 dpg.add_image("logo", pos=[310, 180], width=280, height=76)
-                dpg.add_text("Software Version: 1.0.1", pos=[330, 276])
+                dpg.add_text("Software Version: 1.0.2", pos=[330, 276])
                 dpg.bind_item_font(dpg.last_item(), font_regular_48)
 
             with dpg.child_window(autosize_x=True, autosize_y=True, show=False, tag="device_page", border=False):
