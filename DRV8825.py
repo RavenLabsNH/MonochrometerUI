@@ -68,7 +68,8 @@ class DRV8825():
         if (mode == ControlMode[1]):
             self.digital_write(self.mode_pins, microstep[stepformat])
         
-    def TurnStep(self, Dir, steps, stepdelay=0.0000005):
+    def TurnStep(self, Dir, steps, stepdelay=0.000005):
+
         if (Dir == MotorDir[0]):
             self.digital_write(self.enable_pin, 1)
             self.digital_write(self.dir_pin, 0)
@@ -99,13 +100,14 @@ class DRV8825():
             self.digital_write(self.step_pin, True)
             time.sleep(stepdelay)
             self.digital_write(self.step_pin, False)
+            time.sleep(stepdelay)
             if (Dir == MotorDir[0]):
                 self.current_position.value = self.current_position.value - (1 / self.steps_per_nm)
             else:
                 self.current_position.value = self.current_position.value + (1 / self.steps_per_nm)
 
 
-    def TurnContinous(self, dir, stepdelay=0.0000005):
+    def TurnContinous(self, dir, stepdelay=0.000005):
         if (dir == MotorDir[0]):
             self.digital_write(self.enable_pin, 1)
             self.digital_write(self.dir_pin, 0)
@@ -129,6 +131,7 @@ class DRV8825():
             self.digital_write(self.step_pin, True)
             time.sleep(stepdelay)
             self.digital_write(self.step_pin, False)
+            time.sleep(stepdelay)
             if (dir == MotorDir[0]):
                 self.current_position.value = self.current_position.value - (1/self.steps_per_nm)
             else:

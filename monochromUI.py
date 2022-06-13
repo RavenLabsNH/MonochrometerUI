@@ -669,7 +669,7 @@ class MonochromUI():
         change_view(None, None, "device_page")
 
     def calculate_speed_delay(self):
-        delay = (-0.0000505 * self.speed_factor) + .0050505
+        delay = (-0.00005 * self.speed_factor) + .00505
         print("speed factor: " + str(self.speed_factor) + " delay: " + str(delay))
         return delay
 
